@@ -2,6 +2,12 @@ import type { StateCreator } from 'zustand'
 import type { AppState } from '@/store/types'
 import { SLOT_TYPES, type EditorMode, type SlotType } from '@/lib/types'
 
+export interface ProjectMeta {
+  id: string
+  name: string
+  createdAt: number
+}
+
 export interface EditorSlice {
   /** Index into `activeSlots` the user is currently editing. */
   currentStep: number
@@ -11,6 +17,11 @@ export interface EditorSlice {
   /** The ordered slot sequence the editor walks (set by the editor; defaults to all). */
   activeSlots: SlotType[]
 
+  /** Persistence identity of the project currently open in the editor. */
+  projectId: string | null
+  projectName: string
+  projectCreatedAt: number
+
   setActiveSlots: (slots: SlotType[]) => void
   setCurrentStep: (step: number) => void
   goToNextSlot: () => void
@@ -18,6 +29,7 @@ export interface EditorSlice {
   goToSlot: (step: number) => void
   setEditorMode: (mode: EditorMode) => void
   setReviewMode: (review: boolean) => void
+  setProjectMeta: (meta: ProjectMeta) => void
 }
 
 export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (set) => ({
@@ -25,8 +37,13 @@ export const createEditorSlice: StateCreator<AppState, [], [], EditorSlice> = (s
   editorMode: 'slot-editor',
   isReviewMode: false,
   activeSlots: [...SLOT_TYPES],
+  projectId: null,
+  projectName: 'My Doll',
+  projectCreatedAt: 0,
 
   setActiveSlots: (slots) => set({ activeSlots: slots }),
+  setProjectMeta: (meta) =>
+    set({ projectId: meta.id, projectName: meta.name, projectCreatedAt: meta.createdAt }),
   setCurrentStep: (step) => set({ currentStep: step }),
 
   goToNextSlot: () =>
