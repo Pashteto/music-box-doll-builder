@@ -1,8 +1,10 @@
 {
   "dependencies": {
+    "howler": "^2.2.4",
     "idb": "^8.0.3"
   },
   "devDependencies": {
+    "@types/howler": "^2.2.13",
     "fake-indexeddb": "^6.2.5"
   }
 }
