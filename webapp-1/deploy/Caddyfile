@@ -1,0 +1,21 @@
+# Caddy site config for the Music Box Doll Builder frontend (static export).
+# Auto-provisions HTTPS via Let's Encrypt. Requires ports 80+443 free on the host.
+#
+# Install on the target dir, e.g. import from /etc/caddy/Caddyfile, then:
+#   sudo caddy reload --config /etc/caddy/Caddyfile
+
+lindentar.pashteto.com {
+	root * /srv/lindentar/out
+	encode gzip zstd
+	file_server
+
+	# Long-cache immutable build assets and models; HTML stays revalidated.
+	@immutable path /_next/static/* /assets/*
+	header @immutable Cache-Control "public, max-age=31536000, immutable"
+
+	# Static-export 404.
+	handle_errors {
+		rewrite * /404.html
+		file_server
+	}
+}
