@@ -1,0 +1,2 @@
+# Run lint-staged inside the webapp-1 npm project (git root is the parent dir).
+cd webapp-1 && npx lint-staged
