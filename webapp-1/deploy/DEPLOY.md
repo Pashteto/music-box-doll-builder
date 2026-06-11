@@ -3,6 +3,10 @@
 The app is a **static export** (`out/`), so it needs only a static web server — no
 Node process. Target: **oracle-2** (`passthru.pashteto.com`, `129.146.130.46`).
 
+> **STATUS: LIVE** as of 2026-06-11. The one-time setup below is already done:
+> DNS A record added, Caddy v2 installed and serving `/srv/lindentar/out`, valid
+> Let's Encrypt cert. **Routine redeploys now only need step 2** (`./deploy/deploy.sh`).
+
 > Manual deploy (flagged per IaC policy). A `GitHub Actions` auto-deploy is the
 > intended follow-up; see "CI" below.
 

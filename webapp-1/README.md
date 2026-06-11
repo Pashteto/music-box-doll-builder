@@ -5,6 +5,10 @@ music, render a looping MP4 in the browser, and share it. This repo currently
 implements the **lean core-loop MVP** (see `../CLAUDE.md` and `docs/EPICS.md` for the
 full Phase 1 plan).
 
+**🌐 Live:** https://lindentar.pashteto.com — static export served by Caddy on oracle-2.
+Redeploy with `./deploy/deploy.sh`; full runbook in [`deploy/DEPLOY.md`](deploy/DEPLOY.md).
+New here? Start with [`HANDOFF.md`](HANDOFF.md).
+
 ## What works today
 
 Landing → assemble doll (5 slots) → decorate scene → pick music → render video → share/download.

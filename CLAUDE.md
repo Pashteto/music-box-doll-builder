@@ -8,34 +8,37 @@ Music Box Doll Builder — a mobile-first web app where users assemble a customi
 
 The implementation target is `webapp-1/`. This root directory holds research docs, PDFs, and a reference 3D scene asset.
 
+## Current Status (2026-06-11)
+
+**Lean core-loop MVP is built and deployed.** The full flow works end-to-end: landing → assemble doll (5 slots) → decorate scene → pick music → render an MP4 in-browser → share/download.
+
+- **Live:** https://lindentar.pashteto.com (static export on oracle-2, served by Caddy with auto-HTTPS)
+- **Code:** the Next.js app lives at the **`webapp-1/` root** (`package.json`, `src/`, `public/` directly under `webapp-1/`)
+- **Branch / PR:** `feat/mvp-core-loop` → PR #1 on `Pashteto/music-box-doll-builder`
+- **Deferred** (still spec'd in `webapp-1/docs/tasks/`): Go backend + real Stripe (E12 full), analytics (E13), PWA (E14), backend catalog/sessions (E15), global-adjust (E7), floating props (E8-T3)
+
+See `webapp-1/HANDOFF.md` for the onboarding/handoff guide and `webapp-1/deploy/DEPLOY.md` for the deploy runbook.
+
 ## Implementation Directory
 
-All development happens in `webapp-1/`. That subdirectory has its own `CLAUDE.md` with the full tech stack, architecture patterns, data models, API endpoints, and conventions — read it before making any changes.
+All development happens in `webapp-1/`. That subdirectory has its own `CLAUDE.md` (stack, architecture, data models, conventions, implementation status) — read it before making changes.
 
-## Dev Commands (Expected Once Scaffolded per E0)
+## Dev Commands
 
-**Frontend** (`webapp-1/frontend/` or root of Next.js project):
+Run from `webapp-1/` (the Next.js project root):
 ```
-npm run dev          # local dev server (Next.js)
-npm run build        # production build
-npm run lint         # ESLint + TypeScript check
-npm run test         # Jest unit tests
-npm run test -- -t "test name"   # single test
-```
-
-**Backend** (`webapp-1/backend/`):
-```
-go run ./cmd/api/    # start Go API server
-go test ./...        # all backend tests
-go test ./internal/entitlements/...  # single package
-go build ./cmd/api/  # compile binary
+npm run dev          # local dev server (http://localhost:3000)
+npm run build        # production build → static export in out/
+npm run lint         # ESLint
+npm run typecheck    # tsc --noEmit
+npm run test         # Vitest unit tests
+npm run test -- -t "test name"        # single test
+npm run format       # Prettier
+node scripts/gen-placeholder-assets.mjs   # (re)generate placeholder catalog assets
+./deploy/deploy.sh   # build + rsync out/ to oracle-2 (see deploy/DEPLOY.md)
 ```
 
-**Local infra** (PostgreSQL + Redis + backend):
-```
-docker-compose up    # start all services
-docker-compose up -d postgres redis   # deps only
-```
+> Test runner is **Vitest** (not Jest, despite older spec text). The **backend is not built yet** (deferred); when built, scaffold it from the Go monolith template (see Infrastructure below).
 
 ## Task Structure
 
@@ -57,11 +60,13 @@ Recommended implementation order: E0 → E2+E3 (parallel) → E5 → E6+E4 (para
 
 ## Infrastructure
 
-Two Oracle Cloud instances for backend hosting:
-- `oracle-1` — 129.146.183.89 (ARM, 7.7 GB RAM) — primary candidate for Go backend
-- `oracle-2` — 129.146.130.46 (x86, 958 MB RAM) — lighter workloads
+Two Oracle Cloud instances (reachable via `ssh oracle-1` / `ssh oracle-2`):
+- `oracle-1` — 129.146.183.89 (ARM, 7.7 GB RAM) — hosts `amphitheater.pashteto.com` and the Go bot; **leave untouched**
+- `oracle-2` — 129.146.130.46 (x86, 958 MB RAM) — **hosts this frontend** at `lindentar.pashteto.com` (Caddy, web root `/srv/lindentar/out`)
 
-Frontend deploys to Vercel. GLB/texture assets served from Cloudflare R2.
+The frontend is a **static export** served by Caddy on oracle-2 (not Vercel). DNS A record `lindentar → 129.146.130.46` lives in Namecheap (`pashteto.com`). The MVP uses placeholder GLB assets bundled in `public/`; production assets would later move to a CDN (Cloudflare R2).
+
+VPN/proxy services that previously ran on oracle-2 (`xray`, `hysteria-server`, `tailscaled`) were stopped + disabled on 2026-06-11.
 
 **Backend service template (REQUIRED):** Build any Go backend from the template at
 `/Users/dodonovpavel/gateway_fm/go-microservice-template` — used as a **single modular monolith**,

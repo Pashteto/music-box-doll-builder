@@ -15,6 +15,34 @@ This document breaks the Phase 1 prototype into implementation epics and tasks. 
 
 ---
 
+## Implementation Status (2026-06-11)
+
+The **lean core-loop MVP** is built and live at https://lindentar.pashteto.com. Status per epic:
+
+| Epic | Status | Notes |
+|------|--------|-------|
+| E0 Scaffolding | ✅ frontend (T1–T4) | T5–T7 (Go backend, docker-compose, CI) deferred |
+| E1 Landing | ✅ | SSR shell + lazy R3F demo + Create/Continue |
+| E2 Zustand state | ✅ | store + constraint clamps |
+| E3 Catalog | ✅ | static `public/catalog/manifest.json` (no backend endpoint) |
+| E4 IndexedDB storage | ✅ | save / autosave / resume |
+| E5 3D scene | ✅ | transforms via sliders (not pinch/drag) |
+| E6 Slot editor | ✅ | 5 active slots |
+| E7 Global adjustment | ⛔ deferred | |
+| E8 Scene composer | ◑ partial | bg/fg done; floating props (T3) deferred |
+| E9 Music selection | ✅ | Howler preview + duration |
+| E10 Video render | ✅ | WebCodecs H.264+AAC / MediaRecorder fallback |
+| E11 Share | ✅ | Web Share + download |
+| E12 Paywall & Stripe | ◑ stub | first-free gate + placeholder UI; **no Stripe/backend** |
+| E13 Analytics | ⛔ deferred | |
+| E14 PWA / SW | ⛔ deferred | |
+| E15 Backend catalog/sessions | ⛔ deferred | |
+| E16 Polish & perf | ◑ partial | mobile viewport (T1) done; bundle/perf/browser audits deferred |
+
+Deferred backend work must be built from the `go-microservice-template` as a single modular monolith (see `../CLAUDE.md`). Full handoff: `../HANDOFF.md`.
+
+---
+
 ## E0: Project Scaffolding & Dev Infrastructure (P0)
 
 Bootstrap the codebase so all subsequent epics have a working dev environment.

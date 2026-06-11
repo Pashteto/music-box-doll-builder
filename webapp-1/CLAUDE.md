@@ -8,6 +8,24 @@ Primary target: iPhone users (Safari/Chrome). Web-first for instant URL distribu
 
 Phase 1 scope: 1 doll template, 3-5 active slots, 20-30 GLB assets, 1 scene template, 1 music track, local in-browser render, simple paywall.
 
+## Implementation Status (2026-06-11)
+
+The **lean core-loop MVP is built and live** at https://lindentar.pashteto.com. The Next.js app is at this directory's root (`src/`, `public/`, `package.json`). The doc below describes the _full_ Phase-1 plan; only a subset is implemented:
+
+**Built:** scaffold (E0 frontend) · Zustand store + constraints (E2) · catalog manifest/loader/GLB AssetLoader (E3) · 3D scene foundation (E5) · slot editor (E6) · IndexedDB drafts + autosave (E4) · minimal scene composer bg/fg (E8-T1/T2) · music selection + Howler (E9) · **in-browser render engine** WebCodecs H.264+AAC / MediaRecorder fallback (E10) · share/download (E11) · landing (E1) · paywall **stub** — first export free, then placeholder (E12-T7/T8) · mobile viewport polish (E16-T1).
+
+**Deferred** (still fully spec'd in `docs/tasks/`): Go backend + real Stripe (E12-T1..T6/T9), analytics (E13), PWA/offline (E14), backend catalog/sessions (E15), global-adjustment mode (E7), floating props (E8-T3), bundle-size/perf audits (E16-T2/T3/T4).
+
+**Deviations from the spec below, by design:**
+
+- Frontend served by **Caddy on oracle-2** (static export), not Vercel.
+- Catalog comes from a **static `public/catalog/manifest.json`**, not the Go `/api/v1/catalog/manifest` endpoint.
+- Assets are **placeholders** (generated primitives + a synthesized WAV); real GLB/KTX2/Draco assets swap into the manifest later.
+- Test runner is **Vitest**; constrained transforms use **sliders** (not in-canvas pinch/drag).
+- The API endpoints / data-store sections below describe the **planned backend**, which does not exist yet.
+
+See `HANDOFF.md` (onboarding) and `deploy/DEPLOY.md` (deploy runbook).
+
 ## Reference Documents
 
 - `docs/web-app-research.md` -- tech research, stack decisions, risks, phased roadmap
