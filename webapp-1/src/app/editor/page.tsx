@@ -83,16 +83,20 @@ export default function EditorPage() {
 
   return (
     <main className="flex min-h-dvh flex-col bg-background">
-      {/* 3D stage (hidden during render — RenderScreen owns its own offscreen canvas) */}
+      {/* 3D stage (hidden during render — RenderScreen owns its own offscreen canvas).
+          absolute inset-0 gives the canvas a definite height; aspect-[9/16] keeps the
+          portrait product framing and centers it on wide screens. */}
       {editorMode !== 'render' ? (
-        <div className="flex-1 p-3 pb-0">
-          <DollScene className="h-full min-h-[45dvh] w-full overflow-hidden rounded-2xl bg-[#1a1424]">
-            <DollComposition
-              manifest={manifest}
-              selectedSlot={inSlotEditor ? currentSlot : null}
-              showScene={!inSlotEditor}
-            />
-          </DollScene>
+        <div className="relative min-h-0 flex-1">
+          <div className="absolute inset-0 flex items-center justify-center p-3">
+            <DollScene className="aspect-[9/16] h-full max-w-full overflow-hidden rounded-2xl bg-[#1a1424]">
+              <DollComposition
+                manifest={manifest}
+                selectedSlot={inSlotEditor ? currentSlot : null}
+                showScene={!inSlotEditor}
+              />
+            </DollScene>
+          </div>
         </div>
       ) : null}
 
