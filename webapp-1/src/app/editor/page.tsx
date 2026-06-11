@@ -11,6 +11,8 @@ import { TransformControls } from '@/modules/scene/TransformControls'
 import { SlotCatalog } from '@/modules/editor/SlotCatalog'
 import { ProgressDots } from '@/modules/editor/ProgressDots'
 import { SceneComposer } from '@/modules/scene-composer/SceneComposer'
+import { MusicSelection } from '@/modules/music/MusicSelection'
+import { RenderScreen } from '@/modules/render/RenderScreen'
 import { PHASE1_SLOTS, SLOT_LABELS } from '@/modules/editor/slots'
 
 function PrimaryButton({
@@ -79,16 +81,18 @@ export default function EditorPage() {
 
   return (
     <main className="flex min-h-dvh flex-col bg-background">
-      {/* 3D stage */}
-      <div className="flex-1 p-3 pb-0">
-        <DollScene className="h-full min-h-[45dvh] w-full overflow-hidden rounded-2xl bg-[#1a1424]">
-          <DollComposition
-            manifest={manifest}
-            selectedSlot={inSlotEditor ? currentSlot : null}
-            showScene={!inSlotEditor}
-          />
-        </DollScene>
-      </div>
+      {/* 3D stage (hidden during render — RenderScreen owns its own offscreen canvas) */}
+      {editorMode !== 'render' ? (
+        <div className="flex-1 p-3 pb-0">
+          <DollScene className="h-full min-h-[45dvh] w-full overflow-hidden rounded-2xl bg-[#1a1424]">
+            <DollComposition
+              manifest={manifest}
+              selectedSlot={inSlotEditor ? currentSlot : null}
+              showScene={!inSlotEditor}
+            />
+          </DollScene>
+        </div>
+      ) : null}
 
       {/* Bottom control panel */}
       <section className="flex flex-col gap-3 rounded-t-3xl bg-white p-4 shadow-[0_-8px_24px_rgba(0,0,0,0.08)]">
@@ -170,12 +174,20 @@ export default function EditorPage() {
           </>
         ) : null}
 
-        {/* Music / render / share — built in Milestone 3 */}
-        {editorMode === 'music' || editorMode === 'render' || editorMode === 'share' ? (
+        {/* Music selection */}
+        {editorMode === 'music' ? (
           <>
-            <h2 className="text-lg font-semibold">Music &amp; render</h2>
-            <p className="text-sm text-foreground/60">Coming together in the next milestone.</p>
+            <h2 className="text-lg font-semibold">Pick your music</h2>
+            <MusicSelection manifest={manifest} onRender={() => setEditorMode('render')} />
             <GhostButton onClick={() => setEditorMode('scene')}>← Back to scene</GhostButton>
+          </>
+        ) : null}
+
+        {/* Render + share */}
+        {editorMode === 'render' || editorMode === 'share' ? (
+          <>
+            <h2 className="text-lg font-semibold">Your video</h2>
+            <RenderScreen manifest={manifest} onBack={() => setEditorMode('music')} />
           </>
         ) : null}
       </section>
