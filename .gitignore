@@ -1,0 +1,43 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# IDE
+.idea/
+**/.idea/
+*.iml
+
+# Claude Code local settings
+.claude/settings.local.json
+**/settings.local.json
+
+# Large binary assets (use Git LFS if needed later)
+*.glb
+*.gltf
+
+# Duplicate files with "(1)" in name
+* (1).*
+* (1)
+
+# ── webapp-1 / Frontend ──────────────────────────
+webapp-1/node_modules/
+webapp-1/.next/
+webapp-1/out/
+webapp-1/dist/
+
+# ── webapp-1 / Backend ───────────────────────────
+webapp-1/backend/bin/
+webapp-1/backend/tmp/
+
+# ── webapp-1 / Infrastructure ────────────────────
+# SSH keys and private credentials — never commit
+webapp-1/servers/instance-pavel/
+
+# Environment files
+webapp-1/.env
+webapp-1/.env.local
+webapp-1/.env.*.local
+webapp-1/backend/.env
+
+# Docker volumes
+webapp-1/docker/volumes/
