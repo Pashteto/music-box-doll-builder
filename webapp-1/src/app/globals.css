@@ -1,0 +1,58 @@
+@import 'tailwindcss';
+
+/*
+ * Tailwind v4 CSS-first config (replaces tailwind.config.ts from the v3-era task spec).
+ * Design tokens live in @theme; content sources are auto-detected by Tailwind v4.
+ * Breakpoints use Tailwind defaults (sm 640 / md 768 / lg 1024 / xl 1280) — sufficient for Phase 1.
+ */
+
+:root {
+  --background: #faf7f5;
+  --foreground: #1f1a24;
+}
+
+@theme {
+  /* Placeholder brand palette — replace with final brand colors later */
+  --color-brand-primary: #6366f1;
+  --color-brand-secondary: #ec4899;
+  --color-brand-accent: #f59e0b;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* Performant system font stack (no web-font download) */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent iOS Safari pull-to-refresh / rubber-banding (E16-T1). */
+    overscroll-behavior: none;
+  }
+
+  /* 3D canvases own their touch gestures (no scroll/zoom conflict). */
+  canvas {
+    touch-action: none;
+  }
+
+  /* Buttons/sliders respond instantly (no 300ms tap delay). */
+  button,
+  input[type='range'] {
+    touch-action: manipulation;
+  }
+}

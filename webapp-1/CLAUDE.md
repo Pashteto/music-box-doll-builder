@@ -17,6 +17,7 @@ Phase 1 scope: 1 doll template, 3-5 active slots, 20-30 GLB assets, 1 scene temp
 ## Tech Stack
 
 ### Frontend
+
 - **React 19** + **Next.js 15** (App Router) + **TypeScript** (strict)
 - **Three.js** via **React Three Fiber (R3F)** + **Drei** -- 3D scene
 - **Zustand** -- global state (composition, editor nav, entitlements)
@@ -30,17 +31,26 @@ Phase 1 scope: 1 doll template, 3-5 active slots, 20-30 GLB assets, 1 scene temp
 - **next-pwa / Workbox** -- Service Worker, asset caching, PWA manifest
 
 ### Backend
+
 - **Golang** -- modular monolith (auth, entitlements, checkout, catalog, analytics, admin)
 - **PostgreSQL** -- entitlements, purchases, sessions, catalog metadata
 - **Redis** -- rate limits, entitlement cache, feature flags, hot catalog
 - **Stripe** -- Checkout for one-time purchase, webhooks for entitlement sync
 
+> **Backend service template (REQUIRED):** When building any backend service, base it on
+> `/Users/dodonovpavel/gateway_fm/go-microservice-template` (cmd/, api/, config/, db/, Makefile,
+> Dockerfile, golangci). Use it as a **single modular monolith**, not as separate microservices —
+> add the auth/entitlements/checkout/catalog/analytics/admin modules inside one service built from
+> the template. See the template's `AGENTS.md`/`README.md` for conventions.
+
 ### Hosting
+
 - **Vercel** -- frontend (Next.js optimized)
 - **Fly.io / Railway** -- Go backend
 - **Cloudflare CDN / R2** -- GLB assets, KTX2 textures, audio, static files
 
 ### Observability
+
 - **OpenTelemetry** -- backend tracing
 - **Sentry** -- frontend error tracking
 - **PostHog** -- analytics, funnel, feature flags (privacy-first, no PII)

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+  <rect width="160" height="160" rx="20" fill="#6366f1"/>
+  <circle cx="80" cy="64" r="34" fill="rgba(255,255,255,0.25)"/>
+  <text x="80" y="74" font-family="system-ui,sans-serif" font-size="34" font-weight="700"
+    fill="#fff" text-anchor="middle">MB</text>
+  <text x="80" y="132" font-family="system-ui,sans-serif" font-size="14"
+    fill="rgba(255,255,255,0.9)" text-anchor="middle">Music Box Waltz</text>
+</svg>
