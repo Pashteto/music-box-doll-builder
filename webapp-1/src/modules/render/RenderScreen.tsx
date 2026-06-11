@@ -18,6 +18,8 @@ import { detectRenderPipeline } from '@/modules/render/codecDetection'
 import { renderWebCodecsMp4 } from '@/modules/render/webcodecsPipeline'
 import { renderMediaRecorderVideo } from '@/modules/render/mediaRecorderPipeline'
 import { shareVideo, downloadVideo } from '@/modules/share/shareVideo'
+import { useExportGate } from '@/modules/paywall/useEntitlement'
+import { PaywallScreen } from '@/modules/paywall/PaywallScreen'
 import type { RenderHandles } from '@/modules/render/frameCapturer'
 import type { RenderResult } from '@/modules/render/renderTypes'
 import type { CatalogManifest } from '@/lib/catalog-types'
@@ -50,11 +52,13 @@ export function RenderScreen({ manifest, onBack }: RenderScreenProps) {
   const musicTrackId = useAppStore((s) => s.musicTrackId)
   const videoDuration = useAppStore((s) => s.videoDuration)
 
+  const { canExport, consume } = useExportGate()
   const handlesRef = useRef<RenderHandles | null>(null)
   const startedRef = useRef(false)
   const [status, setStatus] = useState<Status>('preparing')
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [showPaywall, setShowPaywall] = useState(false)
   const [result, setResult] = useState<{
     url: string
     blob: Blob
@@ -141,6 +145,16 @@ export function RenderScreen({ manifest, onBack }: RenderScreenProps) {
     }
   }
 
+  // First export is free; subsequent exports hit the (stubbed) paywall.
+  function gatedExport(action: () => void) {
+    if (!canExport) {
+      setShowPaywall(true)
+      return
+    }
+    action()
+    consume()
+  }
+
   function handleReady(h: RenderHandles) {
     handlesRef.current = h
     if (startedRef.current) return
@@ -210,14 +224,14 @@ export function RenderScreen({ manifest, onBack }: RenderScreenProps) {
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => void shareVideo(result.blob, result.mime)}
+              onClick={() => gatedExport(() => void shareVideo(result.blob, result.mime))}
               className="flex-1 rounded-xl bg-brand-primary px-4 py-3 font-semibold text-white active:scale-95"
             >
               Share
             </button>
             <button
               type="button"
-              onClick={() => downloadVideo(result.blob, result.mime)}
+              onClick={() => gatedExport(() => downloadVideo(result.blob, result.mime))}
               className="flex-1 rounded-xl border-2 border-brand-primary px-4 py-3 font-semibold text-brand-primary active:scale-95"
             >
               Save
@@ -228,6 +242,8 @@ export function RenderScreen({ manifest, onBack }: RenderScreenProps) {
           </button>
         </>
       ) : null}
+
+      {showPaywall ? <PaywallScreen onClose={() => setShowPaywall(false)} /> : null}
 
       {status === 'error' ? (
         <div className="flex flex-col items-center gap-3 py-6">

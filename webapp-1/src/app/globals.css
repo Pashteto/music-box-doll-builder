@@ -41,5 +41,18 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Prevent iOS Safari pull-to-refresh / rubber-banding (E16-T1). */
+    overscroll-behavior: none;
+  }
+
+  /* 3D canvases own their touch gestures (no scroll/zoom conflict). */
+  canvas {
+    touch-action: none;
+  }
+
+  /* Buttons/sliders respond instantly (no 300ms tap delay). */
+  button,
+  input[type='range'] {
+    touch-action: manipulation;
   }
 }
