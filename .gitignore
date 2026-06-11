@@ -11,9 +11,11 @@
 .claude/settings.local.json
 **/settings.local.json
 
-# Large binary assets (use Git LFS if needed later)
+# Large binary assets (use Git LFS if needed later) — e.g. the 73 MB reference scene
 *.glb
 *.gltf
+# ...but DO track the small placeholder catalog models the app needs
+!webapp-1/public/assets/models/*.glb
 
 # Duplicate files with "(1)" in name
 * (1).*
