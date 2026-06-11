@@ -1,0 +1,36 @@
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+*.iml
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# ── Frontend ─────────────────────────────────────
+node_modules/
+.next/
+out/
+dist/
+
+# ── Backend ──────────────────────────────────────
+backend/bin/
+backend/tmp/
+
+# ── Infrastructure ────────────────────────────────
+# SSH keys and private credentials — never commit
+servers/instance-pavel/
+
+# ── Environment ──────────────────────────────────
+.env
+.env.local
+.env.*.local
+backend/.env
+
+# ── Docker ───────────────────────────────────────
+docker/volumes/
+
+# ── Test / Build artifacts ───────────────────────
+coverage/
+*.test.db
