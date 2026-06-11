@@ -13,6 +13,7 @@ import { ProgressDots } from '@/modules/editor/ProgressDots'
 import { SceneComposer } from '@/modules/scene-composer/SceneComposer'
 import { MusicSelection } from '@/modules/music/MusicSelection'
 import { RenderScreen } from '@/modules/render/RenderScreen'
+import { useEntitlementInit } from '@/modules/paywall/useEntitlement'
 import { PHASE1_SLOTS, SLOT_LABELS } from '@/modules/editor/slots'
 
 function PrimaryButton({
@@ -51,6 +52,7 @@ function GhostButton({ children, onClick }: { children: React.ReactNode; onClick
 export default function EditorPage() {
   const { manifest, isLoading, error } = useCatalog()
   useAutosave()
+  useEntitlementInit()
 
   const editorMode = useAppStore((s) => s.editorMode)
   const isReviewMode = useAppStore((s) => s.isReviewMode)
@@ -95,7 +97,7 @@ export default function EditorPage() {
       ) : null}
 
       {/* Bottom control panel */}
-      <section className="flex flex-col gap-3 rounded-t-3xl bg-white p-4 shadow-[0_-8px_24px_rgba(0,0,0,0.08)]">
+      <section className="flex flex-col gap-3 rounded-t-3xl bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-8px_24px_rgba(0,0,0,0.08)]">
         {isLoading ? (
           <p className="text-center text-sm text-foreground/60">Loading catalog…</p>
         ) : null}
