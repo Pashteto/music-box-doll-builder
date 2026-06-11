@@ -1,0 +1,822 @@
+{
+  "version": "1.0.0",
+  "assets": [
+    {
+      "assetId": "head-round-01",
+      "slotType": "head",
+      "displayName": "Round Head",
+      "previewImage": "/assets/previews/head-round-01.svg",
+      "glbFile": "/assets/models/head-round-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 1
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 13384,
+      "triangleCount": 468
+    },
+    {
+      "assetId": "head-oval-01",
+      "slotType": "head",
+      "displayName": "Oval Head",
+      "previewImage": "/assets/previews/head-oval-01.svg",
+      "glbFile": "/assets/models/head-oval-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 1.05
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 13384,
+      "triangleCount": 468
+    },
+    {
+      "assetId": "head-heart-01",
+      "slotType": "head",
+      "displayName": "Heart Head",
+      "previewImage": "/assets/previews/head-heart-01.svg",
+      "glbFile": "/assets/models/head-heart-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 0.95
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 13384,
+      "triangleCount": 468
+    },
+    {
+      "assetId": "hair-long-01",
+      "slotType": "hair",
+      "displayName": "Long Hair",
+      "previewImage": "/assets/previews/hair-long-01.svg",
+      "glbFile": "/assets/models/hair-long-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0.2,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 1.1
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 20848,
+      "triangleCount": 784
+    },
+    {
+      "assetId": "hair-short-01",
+      "slotType": "hair",
+      "displayName": "Short Hair",
+      "previewImage": "/assets/previews/hair-short-01.svg",
+      "glbFile": "/assets/models/hair-short-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0.25,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 0.95
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 20848,
+      "triangleCount": 784
+    },
+    {
+      "assetId": "hair-curly-01",
+      "slotType": "hair",
+      "displayName": "Curly Hair",
+      "previewImage": "/assets/previews/hair-curly-01.svg",
+      "glbFile": "/assets/models/hair-curly-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0.2,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 1.15
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [
+        "hair-long-01"
+      ],
+      "dependencies": [],
+      "fileSizeBytes": 20848,
+      "triangleCount": 784
+    },
+    {
+      "assetId": "hair-braids-01",
+      "slotType": "hair",
+      "displayName": "Braids",
+      "previewImage": "/assets/previews/hair-braids-01.svg",
+      "glbFile": "/assets/models/hair-braids-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0.2,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 1
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 20848,
+      "triangleCount": 784
+    },
+    {
+      "assetId": "body-dress-01",
+      "slotType": "bodyShell",
+      "displayName": "Dress",
+      "previewImage": "/assets/previews/body-dress-01.svg",
+      "glbFile": "/assets/models/body-dress-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 1.2
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 3220,
+      "triangleCount": 36
+    },
+    {
+      "assetId": "body-coat-01",
+      "slotType": "bodyShell",
+      "displayName": "Coat",
+      "previewImage": "/assets/previews/body-coat-01.svg",
+      "glbFile": "/assets/models/body-coat-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 1.1
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 4544,
+      "triangleCount": 72
+    },
+    {
+      "assetId": "body-simple-01",
+      "slotType": "bodyShell",
+      "displayName": "Simple Body",
+      "previewImage": "/assets/previews/body-simple-01.svg",
+      "glbFile": "/assets/models/body-simple-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 1
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 4540,
+      "triangleCount": 72
+    },
+    {
+      "assetId": "wings-butterfly-01",
+      "slotType": "wings",
+      "displayName": "Butterfly Wings",
+      "previewImage": "/assets/previews/wings-butterfly-01.svg",
+      "glbFile": "/assets/models/wings-butterfly-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 1.2
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 1688,
+      "triangleCount": 12
+    },
+    {
+      "assetId": "wings-angel-01",
+      "slotType": "wings",
+      "displayName": "Angel Wings",
+      "previewImage": "/assets/previews/wings-angel-01.svg",
+      "glbFile": "/assets/models/wings-angel-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 1.3
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [
+        "body-simple-01"
+      ],
+      "fileSizeBytes": 1652,
+      "triangleCount": 12
+    },
+    {
+      "assetId": "feet-boots-01",
+      "slotType": "feetBase",
+      "displayName": "Boots",
+      "previewImage": "/assets/previews/feet-boots-01.svg",
+      "glbFile": "/assets/models/feet-boots-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 1
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 1616,
+      "triangleCount": 12
+    },
+    {
+      "assetId": "feet-ballet-01",
+      "slotType": "feetBase",
+      "displayName": "Ballet Shoes",
+      "previewImage": "/assets/previews/feet-ballet-01.svg",
+      "glbFile": "/assets/models/feet-ballet-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 0.9
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 1596,
+      "triangleCount": 12
+    }
+  ],
+  "backgrounds": [
+    {
+      "assetId": "bg-music-box-classic",
+      "slotType": "background",
+      "displayName": "Classic Music Box",
+      "previewImage": "/assets/previews/bg-music-box-classic.svg",
+      "glbFile": "/assets/models/bg-music-box-classic.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0,
+          -3
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 1
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 1640,
+      "triangleCount": 12
+    }
+  ],
+  "foregrounds": [
+    {
+      "assetId": "fg-curtain-red",
+      "slotType": "foreground",
+      "displayName": "Red Curtain",
+      "previewImage": "/assets/previews/fg-curtain-red.svg",
+      "glbFile": "/assets/models/fg-curtain-red.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          -2,
+          2
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 1.5
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 1708,
+      "triangleCount": 12
+    }
+  ],
+  "props": [
+    {
+      "assetId": "prop-star-01",
+      "slotType": "prop",
+      "displayName": "Star",
+      "previewImage": "/assets/previews/prop-star-01.svg",
+      "glbFile": "/assets/models/prop-star-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 0.4
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 3184,
+      "triangleCount": 36
+    },
+    {
+      "assetId": "prop-note-01",
+      "slotType": "prop",
+      "displayName": "Music Note",
+      "previewImage": "/assets/previews/prop-note-01.svg",
+      "glbFile": "/assets/models/prop-note-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 0.4
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 20832,
+      "triangleCount": 784
+    },
+    {
+      "assetId": "prop-flower-01",
+      "slotType": "prop",
+      "displayName": "Flower",
+      "previewImage": "/assets/previews/prop-flower-01.svg",
+      "glbFile": "/assets/models/prop-flower-01.glb",
+      "textureFormat": "embedded",
+      "defaultTransform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": 0.4
+      },
+      "minScale": 0.8,
+      "maxScale": 1.5,
+      "minRotation": [
+        -0.3,
+        -3.141592653589793,
+        -0.3
+      ],
+      "maxRotation": [
+        0.3,
+        3.141592653589793,
+        0.3
+      ],
+      "anchorPoint": [
+        0,
+        0,
+        0
+      ],
+      "excludes": [],
+      "dependencies": [],
+      "fileSizeBytes": 13368,
+      "triangleCount": 468
+    }
+  ],
+  "musicTracks": [
+    {
+      "trackId": "track-music-box-waltz",
+      "displayName": "Music Box Waltz",
+      "audioFile": "/assets/audio/track-music-box-waltz.wav",
+      "durationSeconds": 12,
+      "previewImage": "/assets/previews/track-music-box-waltz.svg"
+    }
+  ]
+}

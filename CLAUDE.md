@@ -62,3 +62,8 @@ Two Oracle Cloud instances for backend hosting:
 - `oracle-2` — 129.146.130.46 (x86, 958 MB RAM) — lighter workloads
 
 Frontend deploys to Vercel. GLB/texture assets served from Cloudflare R2.
+
+**Backend service template (REQUIRED):** Build any Go backend from the template at
+`/Users/dodonovpavel/gateway_fm/go-microservice-template` — used as a **single modular monolith**,
+not as separate microservices. All backend modules (auth, entitlements, checkout, catalog,
+analytics, admin) live inside one service scaffolded from that template.
