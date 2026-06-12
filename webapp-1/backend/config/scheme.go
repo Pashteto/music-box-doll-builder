@@ -1,6 +1,8 @@
 // Package config defines application configuration defaults and schema.
 package config
 
+import "time"
+
 // GRPCConfig holds gRPC server settings.
 type GRPCConfig struct {
 	Host             string `mapstructure:"host"`
@@ -51,6 +53,9 @@ type CORSConfig struct {
 	AllowedHeaders []string `mapstructure:"allowed_headers"` // ["*"] or specific headers
 	MaxAge         int      `mapstructure:"max_age"`         // Preflight cache duration in seconds
 	Enabled        bool     `mapstructure:"enabled"`         // Enable CORS middleware
+	// AllowCredentials enables Access-Control-Allow-Credentials: true.
+	// MUST NOT be combined with AllowedOrigins: ["*"] — use exact origins instead.
+	AllowCredentials bool `mapstructure:"allow_credentials"` // true for cookie-based auth
 }
 
 // RateLimitConfig holds rate limiting settings.
@@ -87,6 +92,13 @@ type WSLimitsConfig struct {
 	MaxConnectionsPerRoom int `mapstructure:"max_connections_per_room"` // Per-room max connections (0 = unlimited)
 }
 
+// AuthConfig configures session cookies.
+type AuthConfig struct {
+	CookieDomain string        `mapstructure:"cookie_domain"` // e.g. ".pashteto.com"; empty for localhost
+	CookieSecure bool          `mapstructure:"cookie_secure"` // true in prod (HTTPS)
+	SessionTTL   time.Duration `mapstructure:"session_ttl"`   // e.g. 720h
+}
+
 // Scheme represents the application configuration scheme.
 type Scheme struct {
 	// Database configuration for repository module (optional; nil if disabled).
@@ -103,6 +115,9 @@ type Scheme struct {
 
 	// WebSocket configuration for WebSocket module (optional; nil if disabled).
 	WebSocket *WebSocketConfig `mapstructure:"websocket"`
+
+	// Auth configuration for session cookie settings.
+	Auth *AuthConfig `mapstructure:"auth"`
 
 	// Env is the application environment (e.g. prod, dev, local).
 	Env string `mapstructure:"env"`

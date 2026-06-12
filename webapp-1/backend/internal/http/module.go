@@ -25,6 +25,7 @@ import (
 // Module implements module.Module interface for the HTTP server.
 type Module struct {
 	config     *config.HTTPConfig
+	authConfig *config.AuthConfig
 	service    service.IService
 	grpcClient grpcclient.IClient
 	server     *httpserver.Server
@@ -34,9 +35,10 @@ type Module struct {
 }
 
 // NewModule creates a new HTTP module instance.
-func NewModule(cfg *config.HTTPConfig, svc service.IService, grpcClient grpcclient.IClient) *Module {
+func NewModule(cfg *config.HTTPConfig, authCfg *config.AuthConfig, svc service.IService, grpcClient grpcclient.IClient) *Module {
 	return &Module{
 		config:     cfg,
+		authConfig: authCfg,
 		service:    svc,
 		grpcClient: grpcClient,
 	}
@@ -124,8 +126,21 @@ func (m *Module) initAPI() error {
 	api.UsersGetUserByEmailHandler = handlers.NewGetUserByEmail(m.service, m.grpcClient)
 	api.HealthGetHealthHandler = handlers.NewHealth()
 
-	// Auth handlers
-	cookie := handlers.NewCookieConfig("", false, 30*24*time.Hour) // TODO(Task 12): from config (m.config.Auth)
+	// Auth handlers — cookie config driven from AuthConfig; guard against nil and zero TTL.
+	// NOTE: viper.Unmarshal without a StringToTimeDuration decode hook will unmarshal a
+	// duration string like "720h" as 0 for time.Duration fields. The default is set as
+	// int64 nanoseconds so it unmarshals correctly; the guard below handles any edge case.
+	ttl := 720 * time.Hour
+	domain := ""
+	secure := false
+	if m.authConfig != nil {
+		domain = m.authConfig.CookieDomain
+		secure = m.authConfig.CookieSecure
+		if m.authConfig.SessionTTL > 0 {
+			ttl = m.authConfig.SessionTTL
+		}
+	}
+	cookie := handlers.NewCookieConfig(domain, secure, ttl)
 	api.AuthSignupHandler = handlers.NewSignup(m.service, cookie)
 	api.AuthLoginHandler = handlers.NewLogin(m.service, cookie)
 	api.AuthLogoutHandler = handlers.NewLogout(m.service, cookie)

@@ -124,7 +124,7 @@ func (app *App) registerModules() error {
 		logger.Log().Info("http enabled, registering http module")
 
 		// Pass grpcClient to HTTP module (can be nil)
-		httpModule := httpmod.NewModule(app.config.HTTP, app.svc, grpcClientModule)
+		httpModule := httpmod.NewModule(app.config.HTTP, app.config.Auth, app.svc, grpcClientModule)
 		app.modules.Register(httpModule)
 
 		// Initialize HTTP module
