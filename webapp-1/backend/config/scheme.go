@@ -99,10 +99,23 @@ type AuthConfig struct {
 	SessionTTL   time.Duration `mapstructure:"session_ttl"`   // e.g. 720h
 }
 
+// CacheConfig configures the Redis connection used for session caching and
+// login rate-limiting.
+type CacheConfig struct {
+	Enabled  bool   `mapstructure:"enabled"`
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	Password string `mapstructure:"password"`
+	DB       int    `mapstructure:"db"`
+}
+
 // Scheme represents the application configuration scheme.
 type Scheme struct {
 	// Database configuration for repository module (optional; nil if disabled).
 	Database *DatabaseConfig `mapstructure:"database"`
+
+	// Cache configuration for Redis module (optional; nil if disabled).
+	Cache *CacheConfig `mapstructure:"cache"`
 
 	// GRPC configuration for gRPC module (optional; nil if disabled).
 	GRPC *GRPCConfig `mapstructure:"grpc"`

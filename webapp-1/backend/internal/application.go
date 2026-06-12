@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"dollbuilder/config"
+	cachemod "dollbuilder/internal/cache"
 	grpcmod "dollbuilder/internal/grpc"
 	grpcclientmod "dollbuilder/internal/grpcclient"
 	httpmod "dollbuilder/internal/http"
@@ -26,6 +27,10 @@ type App struct {
 	config  *config.Scheme
 	version *version.Version
 	modules *module.Manager
+
+	// Infrastructure modules kept for cross-module wiring (e.g., Task 14 passes
+	// cacheModule to the service module).
+	cacheModule *cachemod.Module
 
 	// Services (exposed to transports like HTTP/gRPC)
 	// Will be nil if dependent modules (e.g., repository) are not enabled.
@@ -66,6 +71,8 @@ func (app *App) Init() error {
 //
 //nolint:gocyclo // should decompose later
 func (app *App) registerModules() error {
+	ctx := context.Background()
+
 	// 1. Infrastructure: Repository (database-backed) is optional
 	var repoModule *repository.Module
 	if app.config.Database != nil && app.config.Database.Enabled {
@@ -75,7 +82,15 @@ func (app *App) registerModules() error {
 		app.modules.Register(repoModule)
 	}
 
-	// 2. Infrastructure: gRPC Client for external services (optional)
+	// 2. Infrastructure: Cache (Redis) — optional, used for session cache + rate-limiting
+	cacheModule := cachemod.NewModule(app.config.Cache)
+	app.modules.Register(cacheModule)
+	if err := cacheModule.Init(ctx); err != nil {
+		return fmt.Errorf("init cache module: %w", err)
+	}
+	app.cacheModule = cacheModule
+
+	// 3. Infrastructure: gRPC Client for external services (optional)
 	var grpcClientModule *grpcclientmod.Module
 	if app.config.GRPCClient != nil && app.config.GRPCClient.Enabled {
 		logger.Log().Info("grpc_client enabled, registering grpc client module")
@@ -84,7 +99,7 @@ func (app *App) registerModules() error {
 		app.modules.Register(grpcClientModule)
 	}
 
-	// 3. Business logic: Service module is always registered; repository may be nil
+	// 4. Business logic: Service module is always registered; repository may be nil
 	logger.Log().Info("registering service module")
 
 	// Pass repository module as provider; service will retrieve repository during Init
@@ -99,7 +114,6 @@ func (app *App) registerModules() error {
 
 	// Initialize infrastructure and business logic modules first
 	// so we can retrieve the service instance for transport modules
-	ctx := context.Background()
 	if repoModule != nil {
 		if err := repoModule.Init(ctx); err != nil {
 			return fmt.Errorf("init repository module: %w", err)
@@ -119,7 +133,7 @@ func (app *App) registerModules() error {
 
 	logger.Log().Info("infrastructure modules initialized successfully")
 
-	// 4. Transport: HTTP module (optional) - receives both service AND grpcClient
+	// 5. Transport: HTTP module (optional) - receives both service AND grpcClient
 	if app.config.HTTP != nil && app.config.HTTP.Enabled {
 		logger.Log().Info("http enabled, registering http module")
 
@@ -133,7 +147,7 @@ func (app *App) registerModules() error {
 		}
 	}
 
-	// 5. Transport: gRPC server module (optional)
+	// 6. Transport: gRPC server module (optional)
 	if app.config.GRPC != nil && app.config.GRPC.Enabled {
 		logger.Log().Info("grpc enabled, registering grpc module")
 
@@ -146,7 +160,7 @@ func (app *App) registerModules() error {
 		}
 	}
 
-	// 6. Transport: WebSocket server module (optional)
+	// 7. Transport: WebSocket server module (optional)
 	if app.config.WebSocket != nil && app.config.WebSocket.Enabled {
 		logger.Log().Info("websocket enabled, registering websocket module")
 

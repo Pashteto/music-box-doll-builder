@@ -91,6 +91,13 @@ func setDefaults() {
 	viper.SetDefault("websocket.limits.max_connections", 0)          // 0 = unlimited
 	viper.SetDefault("websocket.limits.max_connections_per_room", 0) // 0 = unlimited
 
+	// Cache (Redis) module defaults
+	viper.SetDefault("cache.enabled", false)
+	viper.SetDefault("cache.host", "localhost")
+	viper.SetDefault("cache.port", 6379)
+	viper.SetDefault("cache.password", "")
+	viper.SetDefault("cache.db", 0)
+
 	// Auth / session cookie defaults
 	// NOTE: viper.Unmarshal uses no StringToTimeDuration decode hook, so session_ttl is
 	// stored as int64 nanoseconds. The HTTP module guards against zero and falls back to
