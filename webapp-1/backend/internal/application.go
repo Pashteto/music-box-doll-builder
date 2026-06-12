@@ -109,7 +109,7 @@ func (app *App) registerModules() error {
 	if repoModule != nil {
 		repoProvider = repoModule
 	}
-	svcModule := service.NewModule(repoProvider)
+	svcModule := service.NewModule(repoProvider, app.cacheModule)
 	app.modules.Register(svcModule)
 
 	// Initialize infrastructure and business logic modules first
