@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/gofrs/uuid"
+
 	"dollbuilder/internal/models"
 	"dollbuilder/internal/repository"
 )
@@ -11,13 +13,20 @@ import (
 // moduleMockRepository is a simple in-memory repository for testing purposes.
 type moduleMockRepository struct{}
 
-func (m *moduleMockRepository) CreateUser(_ *models.User) error {
-	return nil
-}
-
+func (m *moduleMockRepository) CreateUser(_ *models.User) error           { return nil }
 func (m *moduleMockRepository) UserBy(_ *models.User, _ repository.UserGetter) error {
 	return nil
 }
+func (m *moduleMockRepository) CreateUserWithPassword(_ *models.User) error {
+	return nil
+}
+func (m *moduleMockRepository) UserByEmail(_ string) (*models.User, error)   { return nil, nil }
+func (m *moduleMockRepository) UserByUUID(_ uuid.UUID) (*models.User, error) { return nil, nil }
+func (m *moduleMockRepository) CreateSession(_ *models.Session) error        { return nil }
+func (m *moduleMockRepository) SessionByTokenHash(_ string) (*models.Session, error) {
+	return nil, nil
+}
+func (m *moduleMockRepository) DeleteSession(_ string) error { return nil }
 
 // mockRepositoryProvider wraps a repository for testing.
 type mockRepositoryProvider struct {
