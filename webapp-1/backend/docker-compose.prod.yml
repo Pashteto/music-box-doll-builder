@@ -1,0 +1,82 @@
+# Production compose for oracle-1. Hardened vs the dev docker-compose.yml:
+#   - no host-exposed Postgres/Redis ports (internal docker network only)
+#   - app bound to 127.0.0.1 only (nginx terminates TLS and reverse-proxies)
+#   - mock auth OFF, gRPC OFF, Secure cookies, CORS locked to the frontend origin
+#   - secrets come from a server-side .env file (NOT committed) — see .env.prod.example
+#
+# Usage on the server:
+#   docker compose -f docker-compose.prod.yml run --rm migrate
+#   docker compose -f docker-compose.prod.yml up -d --build
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+
+  migrate:
+    image: migrate/migrate
+    depends_on:
+      - postgres
+    volumes:
+      - ./db/migrations:/migrations
+    command:
+      [
+        "-path=/migrations",
+        "-database",
+        "postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable",
+        "up",
+      ]
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+    # Bind to loopback only; nginx on the host proxies to this.
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      DATABASE_ENABLED: "true"
+      DATABASE_HOST: postgres
+      DATABASE_PORT: "5432"
+      DATABASE_USER: ${DB_USER}
+      DATABASE_PASSWORD: ${DB_PASSWORD}
+      DATABASE_NAME: ${DB_NAME}
+      DATABASE_SSL_MODE: disable
+
+      HTTP_ENABLED: "true"
+      HTTP_HOST: "0.0.0.0"
+      HTTP_PORT: "8080"
+      HTTP_MOCK_AUTH: "false"
+
+      # CORS — only the deployed frontend, with credentials (cookies)
+      HTTP_CORS_ALLOWED_ORIGINS: "https://lindentar.pashteto.com"
+      HTTP_CORS_ALLOW_CREDENTIALS: "true"
+
+      # gRPC not used by the web app
+      GRPC_ENABLED: "false"
+
+      # Redis session cache + login rate-limit
+      CACHE_ENABLED: "true"
+      CACHE_HOST: redis
+      CACHE_PORT: "6379"
+
+      # Session cookie — Secure (HTTPS) in prod; host-only (api.lindentar.pashteto.com)
+      AUTH_COOKIE_DOMAIN: ""
+      AUTH_COOKIE_SECURE: "true"
+      AUTH_SESSION_TTL: "720h"
+
+volumes:
+  pgdata:

@@ -16,12 +16,14 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 
-# Copy the Makefile and the rest of the source code
+# Copy the Makefile and the rest of the source code. NOTE: the generated
+# go-swagger/protobuf code is gitignored, so build from a working tree where
+# `make generate-all` has already run (not a bare git clone). .dockerignore
+# keeps .git/data/.env out of the build context.
 COPY Makefile .
-COPY .git ./.git
 COPY . ./
 
-# Build the application
+# Build the application (binary name = APP=dollbuilder from the Makefile)
 RUN make build
 
 # Create a new, smaller image based on the scratch image (an empty, executable image)
@@ -31,8 +33,8 @@ FROM scratch
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 # Copy the built executable from the builder image
-COPY --from=builder /app/microservice-template /microservice-template
+COPY --from=builder /app/dollbuilder /dollbuilder
 
 # Set the entrypoint to the executable
-ENTRYPOINT ["/microservice-template"]
+ENTRYPOINT ["/dollbuilder"]
 CMD ["serve"]
