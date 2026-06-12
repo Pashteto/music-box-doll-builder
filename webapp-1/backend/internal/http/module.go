@@ -136,6 +136,7 @@ func (m *Module) initAPI() error {
 		middlewares.Logger(),
 		middlewares.Cors(m.config.CORS),
 		middlewares.RateLimit(m.config.RateLimit),
+		middlewares.SessionAuth(m.service.Authenticate),
 	).Then(api.Serve(nil))
 
 	m.api = api
