@@ -13,7 +13,7 @@ import (
 // moduleMockRepository is a simple in-memory repository for testing purposes.
 type moduleMockRepository struct{}
 
-func (m *moduleMockRepository) CreateUser(_ *models.User) error           { return nil }
+func (m *moduleMockRepository) CreateUser(_ *models.User) error { return nil }
 func (m *moduleMockRepository) UserBy(_ *models.User, _ repository.UserGetter) error {
 	return nil
 }
@@ -27,6 +27,16 @@ func (m *moduleMockRepository) SessionByTokenHash(_ string) (*models.Session, er
 	return nil, nil
 }
 func (m *moduleMockRepository) DeleteSession(_ string) error { return nil }
+
+func (m *moduleMockRepository) CreateProject(p *models.Project) error { return nil }
+func (m *moduleMockRepository) UpdateProject(p *models.Project) error { return nil }
+func (m *moduleMockRepository) ProjectByID(userID, id uuid.UUID) (*models.Project, error) {
+	return nil, nil
+}
+func (m *moduleMockRepository) ListProjects(userID uuid.UUID) ([]*models.Project, error) {
+	return nil, nil
+}
+func (m *moduleMockRepository) DeleteProject(userID, id uuid.UUID) error { return nil }
 
 // mockRepositoryProvider wraps a repository for testing.
 type mockRepositoryProvider struct {

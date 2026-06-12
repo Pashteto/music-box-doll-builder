@@ -1,9 +1,10 @@
 # Backend Deployment — oracle-1
 
 The Go backend (`dollbuilder`) runs on **oracle-1** (`129.146.183.89`, ARM, Ubuntu 22.04)
-via Docker Compose. As of 2026-06-12 it is **running internally** on `127.0.0.1:8080`
-(Postgres + Redis + app, all healthy, auth flow verified). **Not yet public** —
-nginx vhost + TLS + DNS are the remaining steps (see "Going public" below).
+via Docker Compose. As of 2026-06-12 it is **live and public** at
+**`https://api.lindentar.pashteto.com`** (Let's Encrypt TLS, HTTP→HTTPS redirect),
+proxied by nginx to the app on `127.0.0.1:8080` (Postgres + Redis + app, all healthy,
+auth flow verified). The "Going public" steps below are **done** and kept for reference.
 
 ## Where things are
 
@@ -74,10 +75,12 @@ chmod 600 .env
   build context, which the rsync provides.
 - `.dockerignore` excludes `.git`, `data`, `.env`.
 
-## Going public (REMAINING STEPS)
+## Going public (DONE 2026-06-12 — kept for reference / rebuilds)
 
 oracle-1 already runs **nginx** on 80/443 with **certbot** (serving amphitheater/vpn
-subdomains). Add the API as another vhost.
+subdomains). The API was added as another vhost via the steps below. DNS, vhost, and
+TLS are all in place; verified `curl https://api.lindentar.pashteto.com/api/v1/health`
+returns healthy from the public internet.
 
 1. **DNS (do at Namecheap):** add an `A` record
    `api.lindentar.pashteto.com → 129.146.183.89`. (Host `api.lindentar`, value the

@@ -146,6 +146,12 @@ func (m *Module) initAPI() error {
 	api.AuthLogoutHandler = handlers.NewLogout(m.service, cookie)
 	api.AuthGetMeHandler = handlers.NewGetMe(m.service)
 
+	// Project handlers — session enforced inside each handler via request context.
+	api.ProjectsListProjectsHandler = handlers.NewListProjects(m.service)
+	api.ProjectsGetProjectHandler = handlers.NewGetProject(m.service)
+	api.ProjectsUpsertProjectHandler = handlers.NewUpsertProject(m.service)
+	api.ProjectsDeleteProjectHandler = handlers.NewDeleteProject(m.service)
+
 	// TODO: Add more handlers as you expand the API
 	// api.UsersCreateUserHandler = handlers.NewCreateUser(m.service)
 	// api.UsersUpdateUserHandler = handlers.NewUpdateUser(m.service)
