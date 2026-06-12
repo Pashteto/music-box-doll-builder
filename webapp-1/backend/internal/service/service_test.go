@@ -14,7 +14,7 @@ import (
 // serviceMockRepository is a simple in-memory repository for testing purposes.
 type serviceMockRepository struct{}
 
-func (m *serviceMockRepository) CreateUser(_ *models.User) error           { return nil }
+func (m *serviceMockRepository) CreateUser(_ *models.User) error { return nil }
 func (m *serviceMockRepository) UserBy(_ *models.User, _ repository.UserGetter) error {
 	return nil
 }
@@ -28,6 +28,16 @@ func (m *serviceMockRepository) SessionByTokenHash(_ string) (*models.Session, e
 	return nil, nil
 }
 func (m *serviceMockRepository) DeleteSession(_ string) error { return nil }
+
+func (m *serviceMockRepository) CreateProject(p *models.Project) error { return nil }
+func (m *serviceMockRepository) UpdateProject(p *models.Project) error { return nil }
+func (m *serviceMockRepository) ProjectByID(userID, id uuid.UUID) (*models.Project, error) {
+	return nil, nil
+}
+func (m *serviceMockRepository) ListProjects(userID uuid.UUID) ([]*models.Project, error) {
+	return nil, nil
+}
+func (m *serviceMockRepository) DeleteProject(userID, id uuid.UUID) error { return nil }
 
 func TestService_CreateUser(t *testing.T) {
 	repo := &serviceMockRepository{}

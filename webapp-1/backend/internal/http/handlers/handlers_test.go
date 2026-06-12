@@ -20,6 +20,10 @@ import (
 type mockService struct {
 	getUserByEmailFunc func(ctx context.Context, email string) (*domainmodels.User, error)
 	createUserFunc     func(ctx context.Context, user *domainmodels.User) error
+	listProjectsFunc   func(userID uuid.UUID) ([]*domainmodels.Project, error)
+	getProjectFunc     func(userID, id uuid.UUID) (*domainmodels.Project, error)
+	upsertProjectFunc  func(userID uuid.UUID, p *domainmodels.Project) (*domainmodels.Project, error)
+	deleteProjectFunc  func(userID, id uuid.UUID) error
 }
 
 func (m *mockService) GetUserByEmail(ctx context.Context, email string) (*domainmodels.User, error) {
@@ -49,6 +53,34 @@ func (m *mockService) Authenticate(rawToken string) (*domainmodels.User, error) 
 }
 
 func (m *mockService) Logout(rawToken string) error {
+	return nil
+}
+
+func (m *mockService) ListProjects(userID uuid.UUID) ([]*domainmodels.Project, error) {
+	if m.listProjectsFunc != nil {
+		return m.listProjectsFunc(userID)
+	}
+	return nil, nil
+}
+
+func (m *mockService) GetProject(userID, id uuid.UUID) (*domainmodels.Project, error) {
+	if m.getProjectFunc != nil {
+		return m.getProjectFunc(userID, id)
+	}
+	return nil, service.ErrNotFound
+}
+
+func (m *mockService) UpsertProject(userID uuid.UUID, p *domainmodels.Project) (*domainmodels.Project, error) {
+	if m.upsertProjectFunc != nil {
+		return m.upsertProjectFunc(userID, p)
+	}
+	return p, nil
+}
+
+func (m *mockService) DeleteProject(userID, id uuid.UUID) error {
+	if m.deleteProjectFunc != nil {
+		return m.deleteProjectFunc(userID, id)
+	}
 	return nil
 }
 
