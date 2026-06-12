@@ -105,7 +105,6 @@ func (s *Service) GetUserByEmail(_ context.Context, email string) (*models.User,
 	user := &models.User{Email: email}
 
 	if err := s.repository.UserBy(user, repository.Email); err != nil {
-		fmt.Println(err.Error())
 		// Check if it's a not found error from go-pg
 		if errors.Unwrap(err).Error() == "pg: no rows in result set" {
 			return nil, fmt.Errorf("%w: user with email %s", ErrNotFound, email)
