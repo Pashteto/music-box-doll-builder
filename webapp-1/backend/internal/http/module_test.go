@@ -29,6 +29,22 @@ func (m *mockService) GetUserByEmail(_ context.Context, email string) (*domainmo
 	return nil, nil
 }
 
+func (m *mockService) SignUp(email, password, userAgent string) (*domainmodels.User, error) {
+	return nil, nil
+}
+
+func (m *mockService) Login(email, password, userAgent string) (*domainmodels.User, string, error) {
+	return nil, "", nil
+}
+
+func (m *mockService) Authenticate(rawToken string) (*domainmodels.User, error) {
+	return nil, nil
+}
+
+func (m *mockService) Logout(rawToken string) error {
+	return nil
+}
+
 func TestNewModule(t *testing.T) {
 	cfg := &config.HTTPConfig{
 		Host:        "localhost",

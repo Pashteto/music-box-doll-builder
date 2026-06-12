@@ -26,6 +26,21 @@ var (
 	ErrRepositoryUnavailable = errors.New("repository unavailable")
 )
 
+// Auth sentinel errors.
+var (
+	// ErrEmailTaken indicates the email address is already registered.
+	ErrEmailTaken = errors.New("email already registered")
+
+	// ErrInvalidCredentials indicates email or password is incorrect.
+	ErrInvalidCredentials = errors.New("invalid email or password")
+
+	// ErrInvalidSession indicates the session token is invalid or expired.
+	ErrInvalidSession = errors.New("invalid or expired session")
+
+	// ErrWeakPassword indicates the password does not meet minimum requirements.
+	ErrWeakPassword = errors.New("password too short")
+)
+
 // IsNotFound checks if error is a not found error.
 func IsNotFound(err error) bool {
 	return errors.Is(err, ErrNotFound)
