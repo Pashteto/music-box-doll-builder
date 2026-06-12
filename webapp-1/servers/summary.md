@@ -1,6 +1,36 @@
 # Server Summary
 
-Last updated: 2026-04-02
+Last updated: 2026-06-12
+
+Managed servers: **oracle-1**, **oracle-2** (Oracle Cloud), and **vds-amnezia**
+(vdska.ru VPS, dedicated VPN node).
+
+---
+
+## vds-amnezia — `185.5.75.80` (x86, vdska.ru VPS)
+
+Dedicated VPN node, added 2026-06-12. Intended to run **AmneziaVPN** (typically
+installed by pointing the Amnezia client at the box over SSH, which deploys the
+VPN container automatically). Not part of the doll-builder backend.
+
+### Resources
+
+| Resource | Value                       |
+| -------- | --------------------------- |
+| **CPU**  | 1 vCPU                      |
+| **RAM**  | 1 GB                        |
+| **Disk** | 20 GB SSD                   |
+| **OS**   | Ubuntu 22.04                |
+| **Host** | Proxmox VE @ nl210.vdska.ru |
+
+### Access
+
+- SSH: `root@185.5.75.80` (password auth at provisioning — **rotate + switch to SSH
+  key, disable password login**; do not store credentials in this repo).
+- Console: Proxmox VE web UI at `https://nl210.vdska.ru:8006` (3 failed logins → lockout).
+
+> ⚠️ Provisioning credentials were delivered in plaintext by the provider — treat as
+> compromised and rotate before relying on this box. Secrets are **not** recorded here.
 
 ---
 
