@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/gofrs/uuid"
+
 	"dollbuilder/internal/models"
 	"dollbuilder/internal/repository"
 	"dollbuilder/pkg/logger"
@@ -30,6 +32,19 @@ type IService interface {
 
 	// Logout invalidates the session for the given raw token.
 	Logout(rawToken string) error
+
+	// ListProjects returns all projects owned by userID, newest first.
+	ListProjects(userID uuid.UUID) ([]*models.Project, error)
+
+	// GetProject returns one project owned by userID, or ErrNotFound.
+	GetProject(userID, id uuid.UUID) (*models.Project, error)
+
+	// UpsertProject creates or updates a project for userID using last-write-wins
+	// by UpdatedAt. Returns the project the server now holds.
+	UpsertProject(userID uuid.UUID, p *models.Project) (*models.Project, error)
+
+	// DeleteProject removes a project owned by userID.
+	DeleteProject(userID, id uuid.UUID) error
 }
 
 // Service implements IService interface.
