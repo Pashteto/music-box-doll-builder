@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
-  title: Microservice Template API
-  description: RESTful API for microservice template with go-swagger
+  title: Dollbuilder API
+  description: RESTful API for the Music Box Doll Builder backend
   version: 1.0.0
   contact:
     name: API Support
@@ -121,6 +121,60 @@ paths:
               code: 503
               message: "service unhealthy"
 
+  /auth/signup:
+    post:
+      summary: Create an account
+      operationId: signup
+      tags: [auth]
+      security: []
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema: { $ref: "#/definitions/Credentials" }
+      responses:
+        200: { description: Created, schema: { $ref: "#/definitions/AuthResult" } }
+        400: { description: Invalid input, schema: { $ref: "#/definitions/Error" } }
+        409: { description: Email already registered, schema: { $ref: "#/definitions/Error" } }
+        500: { description: Server error, schema: { $ref: "#/definitions/Error" } }
+
+  /auth/login:
+    post:
+      summary: Log in
+      operationId: login
+      tags: [auth]
+      security: []
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema: { $ref: "#/definitions/Credentials" }
+      responses:
+        200: { description: Logged in (sets session cookie), schema: { $ref: "#/definitions/AuthResult" } }
+        400: { description: Invalid input, schema: { $ref: "#/definitions/Error" } }
+        401: { description: Invalid credentials, schema: { $ref: "#/definitions/Error" } }
+        500: { description: Server error, schema: { $ref: "#/definitions/Error" } }
+
+  /auth/logout:
+    post:
+      summary: Log out
+      operationId: logout
+      tags: [auth]
+      security: []
+      responses:
+        204: { description: Logged out (clears cookie) }
+        500: { description: Server error, schema: { $ref: "#/definitions/Error" } }
+
+  /auth/me:
+    get:
+      summary: Current user
+      operationId: getMe
+      tags: [auth]
+      security: []
+      responses:
+        200: { description: Current user, schema: { $ref: "#/definitions/User" } }
+        401: { description: Not authenticated, schema: { $ref: "#/definitions/Error" } }
+
 definitions:
   User:
     type: object
@@ -211,3 +265,23 @@ definitions:
         x-example:
           field: "email"
           reason: "invalid format"
+
+  Credentials:
+    type: object
+    required: [email, password]
+    properties:
+      email:
+        type: string
+        format: email
+        x-example: "user@example.com"
+      password:
+        type: string
+        minLength: 8
+        x-example: "hunter2hunter2"
+
+  AuthResult:
+    type: object
+    required: [user]
+    properties:
+      user:
+        $ref: "#/definitions/User"
