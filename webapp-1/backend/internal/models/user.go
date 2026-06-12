@@ -15,13 +15,14 @@ import (
 type User struct {
 	tableName struct{} `pg:"users,discard_unknown_columns"` //nolint:unused // go-pg table marker
 
-	UUID      uuid.UUID  `pg:"uuid,pk,type:uuid"`
-	Status    UserStatus `pg:"-"`
-	StatusSQL string     `pg:"status,use_zero"`
-	Email     string     `pg:"email,unique,notnull"`
-	Name      string     `pg:"name,notnull"`
-	CreatedAt time.Time  `pg:"created_at,notnull,default:now()"`
-	UpdatedAt time.Time  `pg:"updated_at,notnull,default:now()"`
+	UUID         uuid.UUID  `pg:"uuid,pk,type:uuid"`
+	Status       UserStatus `pg:"-"`
+	StatusSQL    string     `pg:"status,use_zero"`
+	Email        string     `pg:"email,unique,notnull"`
+	Name         string     `pg:"name,notnull"`
+	PasswordHash string     `json:"-" pg:"password_hash"`
+	CreatedAt    time.Time  `pg:"created_at,notnull,default:now()"`
+	UpdatedAt    time.Time  `pg:"updated_at,notnull,default:now()"`
 }
 
 // emailRegex is a basic email validation pattern.
