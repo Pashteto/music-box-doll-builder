@@ -175,6 +175,76 @@ paths:
         200: { description: Current user, schema: { $ref: "#/definitions/User" } }
         401: { description: Not authenticated, schema: { $ref: "#/definitions/Error" } }
 
+  /projects:
+    get:
+      summary: List the current user's projects
+      operationId: listProjects
+      tags: [projects]
+      security: []
+      responses:
+        200:
+          description: The user's projects (newest first)
+          schema:
+            type: array
+            items: { $ref: "#/definitions/Project" }
+        401: { description: Not authenticated, schema: { $ref: "#/definitions/Error" } }
+        500: { description: Server error, schema: { $ref: "#/definitions/Error" } }
+
+  /projects/{id}:
+    get:
+      summary: Fetch one project
+      operationId: getProject
+      tags: [projects]
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          format: uuid
+      responses:
+        200: { description: The project, schema: { $ref: "#/definitions/Project" } }
+        400: { description: Invalid id, schema: { $ref: "#/definitions/Error" } }
+        401: { description: Not authenticated, schema: { $ref: "#/definitions/Error" } }
+        404: { description: Not found, schema: { $ref: "#/definitions/Error" } }
+        500: { description: Server error, schema: { $ref: "#/definitions/Error" } }
+    put:
+      summary: Create or update (sync push) a project
+      operationId: upsertProject
+      tags: [projects]
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          format: uuid
+        - name: body
+          in: body
+          required: true
+          schema: { $ref: "#/definitions/ProjectInput" }
+      responses:
+        200: { description: The stored project (after last-write-wins), schema: { $ref: "#/definitions/Project" } }
+        400: { description: Invalid input, schema: { $ref: "#/definitions/Error" } }
+        401: { description: Not authenticated, schema: { $ref: "#/definitions/Error" } }
+        500: { description: Server error, schema: { $ref: "#/definitions/Error" } }
+    delete:
+      summary: Delete a project
+      operationId: deleteProject
+      tags: [projects]
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          format: uuid
+      responses:
+        204: { description: Deleted }
+        400: { description: Invalid id, schema: { $ref: "#/definitions/Error" } }
+        401: { description: Not authenticated, schema: { $ref: "#/definitions/Error" } }
+        500: { description: Server error, schema: { $ref: "#/definitions/Error" } }
+
 definitions:
   User:
     type: object
@@ -285,3 +355,50 @@ definitions:
     properties:
       user:
         $ref: "#/definitions/User"
+
+  Project:
+    type: object
+    required: [name]
+    properties:
+      uuid:
+        type: string
+        format: uuid
+        description: Client-generated project id
+        readOnly: true
+      name:
+        type: string
+        minLength: 1
+        maxLength: 255
+      data:
+        type: object
+        additionalProperties: true
+        description: The DollProject definition JSON
+      thumbnail:
+        type: string
+        description: Small encoded thumbnail (data URL)
+      updated_at:
+        type: string
+        format: date-time
+        readOnly: true
+      created_at:
+        type: string
+        format: date-time
+        readOnly: true
+
+  ProjectInput:
+    type: object
+    required: [name, data, updated_at]
+    properties:
+      name:
+        type: string
+        minLength: 1
+        maxLength: 255
+      data:
+        type: object
+        additionalProperties: true
+      thumbnail:
+        type: string
+      updated_at:
+        type: string
+        format: date-time
+        description: Client's last-modified time, used for last-write-wins
