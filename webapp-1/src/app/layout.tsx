@@ -3,6 +3,7 @@ import './globals.css'
 import { APP_NAME } from '@/lib/hello'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://lindentar.pashteto.com'),
   title: APP_NAME,
   description: 'Assemble a customizable virtual doll, render a short looping video, and share it.',
   icons: {
