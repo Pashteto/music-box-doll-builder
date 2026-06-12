@@ -58,11 +58,13 @@ func setDefaults() {
 	viper.SetDefault("http.admin_emails", []string{})
 
 	// CORS defaults
+	// allow_credentials: true requires exact origins (never "*") — see CORSConfig.
 	viper.SetDefault("http.cors.enabled", true)
-	viper.SetDefault("http.cors.allowed_origins", []string{"*"})
+	viper.SetDefault("http.cors.allowed_origins", []string{"http://localhost:3000"})
 	viper.SetDefault("http.cors.allowed_methods", []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"})
-	viper.SetDefault("http.cors.allowed_headers", []string{"*"})
+	viper.SetDefault("http.cors.allowed_headers", []string{"Content-Type", "Authorization", "X-Request-ID"})
 	viper.SetDefault("http.cors.max_age", 3600)
+	viper.SetDefault("http.cors.allow_credentials", true)
 
 	// Rate limit defaults
 	viper.SetDefault("http.rate_limit.enabled", false)
@@ -88,4 +90,12 @@ func setDefaults() {
 	// WebSocket connection limits
 	viper.SetDefault("websocket.limits.max_connections", 0)          // 0 = unlimited
 	viper.SetDefault("websocket.limits.max_connections_per_room", 0) // 0 = unlimited
+
+	// Auth / session cookie defaults
+	// NOTE: viper.Unmarshal uses no StringToTimeDuration decode hook, so session_ttl is
+	// stored as int64 nanoseconds. The HTTP module guards against zero and falls back to
+	// 720h if the value cannot be parsed.
+	viper.SetDefault("auth.cookie_domain", "")
+	viper.SetDefault("auth.cookie_secure", false)
+	viper.SetDefault("auth.session_ttl", int64(720*60*60*1e9)) // 720h in nanoseconds
 }

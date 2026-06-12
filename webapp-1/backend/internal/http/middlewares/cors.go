@@ -20,13 +20,21 @@ func Cors(cfg *config.CORSConfig) func(http.Handler) http.Handler {
 		allowedMethods := strings.Join(cfg.AllowedMethods, ", ")
 		allowedHeaders := strings.Join(cfg.AllowedHeaders, ", ")
 		maxAge := cfg.MaxAge
+		allowCredentials := cfg.AllowCredentials
 
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			origin := r.Header.Get("Origin")
 
 			if origin != "" && originAllowed(origin, allowedOrigins) {
+				// Echo the exact origin so credentialed requests work.
 				w.Header().Set("Access-Control-Allow-Origin", origin)
-			} else if allowedOrigins["*"] {
+				if allowCredentials {
+					// Access-Control-Allow-Credentials: true is only valid with an
+					// exact origin — never with "*".
+					w.Header().Set("Access-Control-Allow-Credentials", "true")
+				}
+			} else if allowedOrigins["*"] && !allowCredentials {
+				// Wildcard only when credentials are not required.
 				w.Header().Set("Access-Control-Allow-Origin", "*")
 			}
 
