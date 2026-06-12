@@ -1,5 +1,5 @@
-# Base image must satisfy go.mod's `go 1.25.0` directive.
-FROM golang:1.25 AS base
+# Base image must satisfy go.mod's `go 1.26.1` directive.
+FROM golang:1.26 AS base
 
 # Install needed dependencies for base image and update certs
 RUN apt-get update \
