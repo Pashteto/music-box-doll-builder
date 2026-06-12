@@ -2,3 +2,8 @@
 LICENSE
 README.md
 .gitignore
+.git
+data
+.env
+*.env
+!.env.prod.example
