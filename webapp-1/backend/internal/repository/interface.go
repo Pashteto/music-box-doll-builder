@@ -34,6 +34,22 @@ type IRepository interface {
 	// DeleteSession removes a session by token hash (logout). Missing rows are not an error.
 	DeleteSession(tokenHash string) error
 
+	// CreateProject inserts a new project row.
+	CreateProject(p *models.Project) error
+
+	// UpdateProject updates an existing project row by primary key.
+	UpdateProject(p *models.Project) error
+
+	// ProjectByID returns the project with the given id owned by userID, or
+	// (nil, nil) if no such row exists (not an error).
+	ProjectByID(userID, id uuid.UUID) (*models.Project, error)
+
+	// ListProjects returns all projects owned by userID, newest first.
+	ListProjects(userID uuid.UUID) ([]*models.Project, error)
+
+	// DeleteProject removes a project owned by userID. Missing rows are not an error.
+	DeleteProject(userID, id uuid.UUID) error
+
 	// TODO: Additional repository methods (uncomment and implement as needed):
 	//
 	// // GetOrCreateUser retrieves a user by getter or creates if not found.
