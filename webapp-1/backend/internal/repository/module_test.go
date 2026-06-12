@@ -27,7 +27,16 @@ func (m *moduleMockRepository) CreateSession(_ *models.Session) error        { r
 func (m *moduleMockRepository) SessionByTokenHash(_ string) (*models.Session, error) {
 	return nil, nil
 }
-func (m *moduleMockRepository) DeleteSession(_ string) error { return nil }
+func (m *moduleMockRepository) DeleteSession(_ string) error          { return nil }
+func (m *moduleMockRepository) CreateProject(_ *models.Project) error { return nil }
+func (m *moduleMockRepository) UpdateProject(_ *models.Project) error { return nil }
+func (m *moduleMockRepository) ProjectByID(_, _ uuid.UUID) (*models.Project, error) {
+	return nil, nil
+}
+func (m *moduleMockRepository) ListProjects(_ uuid.UUID) ([]*models.Project, error) {
+	return nil, nil
+}
+func (m *moduleMockRepository) DeleteProject(_, _ uuid.UUID) error { return nil }
 
 func TestRepositoryModule_Lifecycle(t *testing.T) {
 	t.Skip()
