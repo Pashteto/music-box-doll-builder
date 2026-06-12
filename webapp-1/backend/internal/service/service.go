@@ -18,6 +18,18 @@ type IService interface {
 
 	// GetUserByEmail retrieves a user by email address.
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+
+	// SignUp creates a new user account with an email and password.
+	SignUp(email, password, userAgent string) (*models.User, error)
+
+	// Login validates credentials and returns the user and a raw session token.
+	Login(email, password, userAgent string) (*models.User, string, error)
+
+	// Authenticate resolves a raw session token to its user.
+	Authenticate(rawToken string) (*models.User, error)
+
+	// Logout invalidates the session for the given raw token.
+	Logout(rawToken string) error
 }
 
 // Service implements IService interface.

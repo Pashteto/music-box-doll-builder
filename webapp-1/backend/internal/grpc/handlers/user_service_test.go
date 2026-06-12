@@ -36,6 +36,22 @@ func (m *mockService) CreateUser(ctx context.Context, user *models.User) error {
 	return errors.New("not implemented")
 }
 
+func (m *mockService) SignUp(email, password, userAgent string) (*models.User, error) {
+	return nil, nil
+}
+
+func (m *mockService) Login(email, password, userAgent string) (*models.User, string, error) {
+	return nil, "", nil
+}
+
+func (m *mockService) Authenticate(rawToken string) (*models.User, error) {
+	return nil, nil
+}
+
+func (m *mockService) Logout(rawToken string) error {
+	return nil
+}
+
 func TestNewUserServiceHandler(t *testing.T) {
 	t.Parallel()
 

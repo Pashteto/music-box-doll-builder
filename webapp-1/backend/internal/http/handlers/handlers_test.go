@@ -36,6 +36,22 @@ func (m *mockService) CreateUser(ctx context.Context, user *domainmodels.User) e
 	return errors.New("not implemented")
 }
 
+func (m *mockService) SignUp(email, password, userAgent string) (*domainmodels.User, error) {
+	return nil, nil
+}
+
+func (m *mockService) Login(email, password, userAgent string) (*domainmodels.User, string, error) {
+	return nil, "", nil
+}
+
+func (m *mockService) Authenticate(rawToken string) (*domainmodels.User, error) {
+	return nil, nil
+}
+
+func (m *mockService) Logout(rawToken string) error {
+	return nil
+}
+
 func TestNewGetUserByEmail(t *testing.T) {
 	svc := &mockService{}
 	handler := NewGetUserByEmail(svc, nil)
