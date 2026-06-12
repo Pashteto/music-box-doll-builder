@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gofrs/uuid"
+
 	"dollbuilder/config"
 	domainmodels "dollbuilder/internal/models"
 )
@@ -42,6 +44,22 @@ func (m *mockService) Authenticate(rawToken string) (*domainmodels.User, error) 
 }
 
 func (m *mockService) Logout(rawToken string) error {
+	return nil
+}
+
+func (m *mockService) ListProjects(userID uuid.UUID) ([]*domainmodels.Project, error) {
+	return nil, nil
+}
+
+func (m *mockService) GetProject(userID, id uuid.UUID) (*domainmodels.Project, error) {
+	return nil, nil
+}
+
+func (m *mockService) UpsertProject(userID uuid.UUID, p *domainmodels.Project) (*domainmodels.Project, error) {
+	return p, nil
+}
+
+func (m *mockService) DeleteProject(userID, id uuid.UUID) error {
 	return nil
 }
 
