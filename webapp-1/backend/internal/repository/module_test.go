@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/gofrs/uuid"
+
 	"dollbuilder/config"
 	"dollbuilder/internal/models"
 )
@@ -16,6 +18,16 @@ var _ IRepository = (*moduleMockRepository)(nil)
 
 func (m *moduleMockRepository) CreateUser(_ *models.User) error           { return nil }
 func (m *moduleMockRepository) UserBy(_ *models.User, _ UserGetter) error { return nil }
+func (m *moduleMockRepository) CreateUserWithPassword(_ *models.User) error {
+	return nil
+}
+func (m *moduleMockRepository) UserByEmail(_ string) (*models.User, error)   { return nil, nil }
+func (m *moduleMockRepository) UserByUUID(_ uuid.UUID) (*models.User, error) { return nil, nil }
+func (m *moduleMockRepository) CreateSession(_ *models.Session) error        { return nil }
+func (m *moduleMockRepository) SessionByTokenHash(_ string) (*models.Session, error) {
+	return nil, nil
+}
+func (m *moduleMockRepository) DeleteSession(_ string) error { return nil }
 
 func TestRepositoryModule_Lifecycle(t *testing.T) {
 	t.Skip()

@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gofrs/uuid"
+
 	"dollbuilder/internal/models"
 	"dollbuilder/internal/repository"
 )
@@ -12,13 +14,20 @@ import (
 // serviceMockRepository is a simple in-memory repository for testing purposes.
 type serviceMockRepository struct{}
 
-func (m *serviceMockRepository) CreateUser(_ *models.User) error {
-	return nil
-}
-
+func (m *serviceMockRepository) CreateUser(_ *models.User) error           { return nil }
 func (m *serviceMockRepository) UserBy(_ *models.User, _ repository.UserGetter) error {
 	return nil
 }
+func (m *serviceMockRepository) CreateUserWithPassword(_ *models.User) error {
+	return nil
+}
+func (m *serviceMockRepository) UserByEmail(_ string) (*models.User, error)   { return nil, nil }
+func (m *serviceMockRepository) UserByUUID(_ uuid.UUID) (*models.User, error) { return nil, nil }
+func (m *serviceMockRepository) CreateSession(_ *models.Session) error        { return nil }
+func (m *serviceMockRepository) SessionByTokenHash(_ string) (*models.Session, error) {
+	return nil, nil
+}
+func (m *serviceMockRepository) DeleteSession(_ string) error { return nil }
 
 func TestService_CreateUser(t *testing.T) {
 	repo := &serviceMockRepository{}
