@@ -6,7 +6,7 @@
 
 **Architecture:** Copy the template into `webapp-1/backend/`, rename its Go module, and extend its single `service` + `repository` (not new per-feature modules — that matches the template's actual structure). Auth is enforced by a custom `SessionAuth` middleware in the existing `justinas/alice` chain: it reads an httpOnly session cookie, validates the token hash against Postgres, and injects the user into the request context. Handlers read the user via `params.HTTPRequest.Context()`. Login/signup set the cookie via a custom go-swagger `ResponderFunc`. Passwords are hashed with argon2id.
 
-**Tech Stack:** Go 1.24, go-swagger (spec-first HTTP), go-pg (ORM), golang-migrate, Postgres 16, Viper config, Cobra CLI, logrus, `golang.org/x/crypto/argon2`.
+**Tech Stack:** Go 1.24, go-swagger (spec-first HTTP), go-pg (ORM), golang-migrate, Postgres 16, Redis 7 (`github.com/redis/go-redis/v9`) for session caching + login rate-limiting, Viper config, Cobra CLI, logrus, `golang.org/x/crypto/argon2`.
 
 **Spec:** `docs/superpowers/specs/2026-06-12-accounts-sync-mocked-paywall-design.md`
 
@@ -44,6 +44,11 @@ webapp-1/backend/                         # NEW — copied from go-microservice-
   internal/http/handlers/auth_test.go     # NEW
   internal/http/module.go                 # MODIFY — register handlers + middleware
   internal/http/server/...                # REGENERATED via `make generate-api`
+  internal/cache/module.go                # NEW — Redis client wired as a lifecycle module
+  internal/cache/cache.go                 # NEW — SessionCache + rate-limit operations
+  internal/cache/cache_test.go            # NEW — against miniredis (in-memory)
+  internal/service/module.go              # MODIFY — accept a CacheProvider (optional dep)
+  internal/application.go                 # MODIFY — register cache module (infra, before service)
 ```
 
 > **Note on exact symbol names:** the template's interface file may be named `interface.go`, `irepository.go`, or similar, and the service/repository constructors are `NewService(repo)` / `NewPostgresRepository(...)`. Each task says how to locate the real file (`grep`) before editing — follow the actual names you find; the names above are the expected ones.
@@ -1527,17 +1532,405 @@ git commit -m "Add auth config (cookie/session/CORS) + .env.example"
 
 ---
 
+## Task 13: Redis client wired as a lifecycle module
+
+**Files:**
+- Modify: `webapp-1/backend/docker-compose.yml` (add `redis` service)
+- Modify: `webapp-1/backend/config/scheme.go` (`CacheConfig`)
+- Modify: `webapp-1/backend/config/init.go` (defaults)
+- Create: `webapp-1/backend/internal/cache/module.go`
+- Modify: `webapp-1/backend/internal/application.go` (register the module)
+
+- [ ] **Step 1: Add a redis service to docker-compose**
+
+In `webapp-1/backend/docker-compose.yml`, add under `services:`:
+```yaml
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+```
+And add `CACHE_ENABLED`, `CACHE_HOST`, `CACHE_PORT` to the `app` service environment:
+```yaml
+      CACHE_ENABLED: "true"
+      CACHE_HOST: redis
+      CACHE_PORT: "6379"
+```
+
+- [ ] **Step 2: Add `CacheConfig` to the config scheme**
+
+In `config/scheme.go`, add to `Scheme`:
+```go
+	Cache *CacheConfig `mapstructure:"cache"`
+```
+```go
+// CacheConfig configures the Redis connection used for session caching and
+// login rate-limiting.
+type CacheConfig struct {
+	Enabled  bool   `mapstructure:"enabled"`
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	Password string `mapstructure:"password"`
+	DB       int    `mapstructure:"db"`
+}
+```
+
+- [ ] **Step 3: Add defaults in `config/init.go`**
+
+```go
+	viper.SetDefault("cache.enabled", false)
+	viper.SetDefault("cache.host", "localhost")
+	viper.SetDefault("cache.port", 6379)
+	viper.SetDefault("cache.password", "")
+	viper.SetDefault("cache.db", 0)
+```
+
+- [ ] **Step 4: Add the go-redis dependency**
+
+```bash
+cd /Users/dodonovpavel/gateway_fm/REAL_WORLD_ASSETS/4-ol-do/webapp-1/backend
+go get github.com/redis/go-redis/v9 && go mod tidy
+```
+
+- [ ] **Step 5: Implement the cache module (Module interface)**
+
+Inspect the template's existing repository module to copy the exact `Module` interface signature and the logger usage:
+```bash
+sed -n '1,80p' internal/repository/module.go
+cat internal/module/module.go
+```
+`internal/cache/module.go`:
+```go
+// Package cache provides a Redis-backed module for session caching and
+// login rate-limiting. It is optional: when disabled, callers fall back to
+// Postgres-only behavior.
+package cache
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/redis/go-redis/v9"
+
+	"dollbuilder/config"
+	"dollbuilder/pkg/logger"
+)
+
+// Module owns the Redis client lifecycle.
+type Module struct {
+	config *config.CacheConfig
+	client *redis.Client
+	cache  *Cache
+}
+
+// NewModule constructs the cache module from config.
+func NewModule(cfg *config.CacheConfig) *Module { return &Module{config: cfg} }
+
+// Name implements module.Module.
+func (m *Module) Name() string { return "cache" }
+
+// Init connects to Redis if enabled.
+func (m *Module) Init(ctx context.Context) error {
+	if m.config == nil || !m.config.Enabled {
+		logger.Log().Info("cache module disabled")
+		return nil
+	}
+	m.client = redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%d", m.config.Host, m.config.Port),
+		Password: m.config.Password,
+		DB:       m.config.DB,
+	})
+	if err := m.client.Ping(ctx).Err(); err != nil {
+		return fmt.Errorf("connect redis: %w", err)
+	}
+	m.cache = NewCache(m.client)
+	return nil
+}
+
+// Start implements module.Module (nothing to start).
+func (m *Module) Start(ctx context.Context) error { return nil }
+
+// Stop closes the Redis client.
+func (m *Module) Stop(ctx context.Context) error {
+	if m.client != nil {
+		return m.client.Close()
+	}
+	return nil
+}
+
+// HealthCheck pings Redis when enabled.
+func (m *Module) HealthCheck(ctx context.Context) error {
+	if m.client == nil {
+		return nil
+	}
+	return m.client.Ping(ctx).Err()
+}
+
+// Cache exposes the cache operations to the service layer (nil when disabled).
+func (m *Module) Cache() *Cache { return m.cache }
+```
+> Match the real `Module` interface method signatures (context args, return types) and the logger import path (`dollbuilder/pkg/logger`) found in Step 5's inspection. If `Start`/`Stop`/`HealthCheck` use different signatures, adjust.
+
+- [ ] **Step 6: Register the cache module in `internal/application.go`**
+
+In `registerModules()`, register the cache module in the **infrastructure** phase (before the service module), mirroring how the repository module is registered:
+```go
+cacheModule := cache.NewModule(a.config.Cache)
+a.modules.Register(cacheModule)
+```
+Keep a reference (`a.cacheModule = cacheModule` or a local) so it can be passed to the service module as a provider in Task 14.
+
+- [ ] **Step 7: Build + verify Redis connects**
+
+```bash
+cd /Users/dodonovpavel/gateway_fm/REAL_WORLD_ASSETS/4-ol-do/webapp-1/backend
+go build ./... 2>&1 | head -20   # Cache type referenced in Task 14 not yet built? It is — defined in Task 14.
+```
+> The `Cache` type and `NewCache` are added in Task 14. To keep this task independently buildable, add a minimal stub `internal/cache/cache.go` now: `package cache; import "github.com/redis/go-redis/v9"; type Cache struct{ rdb *redis.Client }; func NewCache(rdb *redis.Client) *Cache { return &Cache{rdb} }`. Task 14 fills in its methods (TDD).
+
+```bash
+docker compose up -d postgres redis
+CACHE_ENABLED=true CACHE_HOST=localhost CACHE_PORT=6379 \
+DATABASE_ENABLED=true DATABASE_HOST=localhost DATABASE_USER=dev DATABASE_PASSWORD=dev DATABASE_NAME=dollbuilder_dev \
+HTTP_ENABLED=true go run cmd/dollbuilder.go serve & sleep 4
+curl -s localhost:8080/api/v1/health; kill %1
+```
+Expected: builds; health is `healthy` with Redis connected (no ping error in logs).
+
+- [ ] **Step 8: Commit**
+
+```bash
+cd /Users/dodonovpavel/gateway_fm/REAL_WORLD_ASSETS/4-ol-do
+git add webapp-1/backend/internal/cache webapp-1/backend/config webapp-1/backend/internal/application.go webapp-1/backend/docker-compose.yml webapp-1/backend/go.mod webapp-1/backend/go.sum
+git commit -m "Add Redis cache module (lifecycle-managed, optional)"
+```
+
+---
+
+## Task 14: Session cache + login rate-limiting via Redis (TDD)
+
+**Files:**
+- Modify: `webapp-1/backend/internal/cache/cache.go` (real methods)
+- Test: `webapp-1/backend/internal/cache/cache_test.go` (miniredis)
+- Modify: `webapp-1/backend/internal/service/auth.go` (use optional cache)
+- Modify: `webapp-1/backend/internal/service/module.go` (inject CacheProvider)
+
+- [ ] **Step 1: Write failing cache tests against miniredis**
+
+```bash
+cd /Users/dodonovpavel/gateway_fm/REAL_WORLD_ASSETS/4-ol-do/webapp-1/backend
+go get github.com/alicebob/miniredis/v2 && go mod tidy
+```
+`internal/cache/cache_test.go`:
+```go
+package cache
+
+import (
+	"context"
+	"testing"
+	"time"
+
+	"github.com/alicebob/miniredis/v2"
+	"github.com/redis/go-redis/v9"
+)
+
+func newTestCache(t *testing.T) *Cache {
+	t.Helper()
+	mr, err := miniredis.Run()
+	if err != nil {
+		t.Fatalf("miniredis: %v", err)
+	}
+	t.Cleanup(mr.Close)
+	rdb := redis.NewClient(&redis.Options{Addr: mr.Addr()})
+	return NewCache(rdb)
+}
+
+func TestSessionUserCache(t *testing.T) {
+	c := newTestCache(t)
+	ctx := context.Background()
+
+	if _, ok := c.GetSessionUserID(ctx, "h1"); ok {
+		t.Fatal("expected miss")
+	}
+	c.SetSessionUserID(ctx, "h1", "user-123", time.Minute)
+	got, ok := c.GetSessionUserID(ctx, "h1")
+	if !ok || got != "user-123" {
+		t.Fatalf("expected hit user-123, got %q ok=%v", got, ok)
+	}
+	c.DeleteSession(ctx, "h1")
+	if _, ok := c.GetSessionUserID(ctx, "h1"); ok {
+		t.Fatal("expected miss after delete")
+	}
+}
+
+func TestLoginRateLimit(t *testing.T) {
+	c := newTestCache(t)
+	ctx := context.Background()
+	key := "a@b.com"
+	var lastAllowed bool
+	for i := 0; i < 6; i++ {
+		lastAllowed = c.AllowLoginAttempt(ctx, key, 5, time.Minute)
+	}
+	if lastAllowed {
+		t.Fatal("expected the 6th attempt to be blocked (limit 5)")
+	}
+}
+```
+
+- [ ] **Step 2: Run to confirm failure**
+
+```bash
+cd /Users/dodonovpavel/gateway_fm/REAL_WORLD_ASSETS/4-ol-do/webapp-1/backend
+go test ./internal/cache/ -v
+```
+Expected: FAIL — `GetSessionUserID` / `AllowLoginAttempt` undefined.
+
+- [ ] **Step 3: Implement the cache operations**
+
+Replace `internal/cache/cache.go`:
+```go
+package cache
+
+import (
+	"context"
+	"time"
+
+	"github.com/redis/go-redis/v9"
+)
+
+// Cache wraps Redis with session-cache and rate-limit operations.
+type Cache struct{ rdb *redis.Client }
+
+// NewCache constructs a Cache around a Redis client.
+func NewCache(rdb *redis.Client) *Cache { return &Cache{rdb: rdb} }
+
+func sessKey(tokenHash string) string { return "sess:" + tokenHash }
+func rlKey(id string) string          { return "rl:login:" + id }
+
+// GetSessionUserID returns the cached user id for a session token hash.
+func (c *Cache) GetSessionUserID(ctx context.Context, tokenHash string) (string, bool) {
+	v, err := c.rdb.Get(ctx, sessKey(tokenHash)).Result()
+	if err != nil {
+		return "", false
+	}
+	return v, true
+}
+
+// SetSessionUserID caches the user id for a session token hash.
+func (c *Cache) SetSessionUserID(ctx context.Context, tokenHash, userID string, ttl time.Duration) {
+	c.rdb.Set(ctx, sessKey(tokenHash), userID, ttl)
+}
+
+// DeleteSession evicts a cached session (on logout/expiry).
+func (c *Cache) DeleteSession(ctx context.Context, tokenHash string) {
+	c.rdb.Del(ctx, sessKey(tokenHash))
+}
+
+// AllowLoginAttempt increments the attempt counter for id and reports whether
+// the attempt is allowed (<= limit within the window).
+func (c *Cache) AllowLoginAttempt(ctx context.Context, id string, limit int64, window time.Duration) bool {
+	n, err := c.rdb.Incr(ctx, rlKey(id)).Result()
+	if err != nil {
+		return true // fail-open: never lock users out due to a cache outage
+	}
+	if n == 1 {
+		c.rdb.Expire(ctx, rlKey(id), window)
+	}
+	return n <= limit
+}
+```
+
+- [ ] **Step 4: Run cache tests**
+
+```bash
+cd /Users/dodonovpavel/gateway_fm/REAL_WORLD_ASSETS/4-ol-do/webapp-1/backend
+go test ./internal/cache/ -v
+```
+Expected: PASS.
+
+- [ ] **Step 5: Give the service an optional cache and use it**
+
+Define the interface the service needs (in `internal/service/auth.go`, near `authRepo`):
+```go
+// sessionCache is the optional Redis cache; nil-safe (service works without it).
+type sessionCache interface {
+	GetSessionUserID(ctx context.Context, tokenHash string) (string, bool)
+	SetSessionUserID(ctx context.Context, tokenHash, userID string, ttl time.Duration)
+	DeleteSession(ctx context.Context, tokenHash string)
+	AllowLoginAttempt(ctx context.Context, id string, limit int64, window time.Duration) bool
+}
+```
+Add a `cache sessionCache` field to `Service` (set via module injection in Step 6). Then:
+
+In `Login`, before verifying the password, add rate-limiting (skip when cache is nil):
+```go
+	if s.cache != nil && !s.cache.AllowLoginAttempt(context.Background(), email, 10, 15*time.Minute) {
+		return nil, "", ErrInvalidCredentials // do not reveal rate-limit state
+	}
+```
+In `authenticateByHash`, consult the cache first and populate it on a DB hit:
+```go
+	if s.cache != nil {
+		if uid, ok := s.cache.GetSessionUserID(context.Background(), tokenHash); ok {
+			id, err := uuid.FromString(uid)
+			if err == nil {
+				return s.repo.UserByUUID(id)
+			}
+		}
+	}
+	// ... existing DB lookup of session + user ...
+	if s.cache != nil {
+		s.cache.SetSessionUserID(context.Background(), tokenHash, user.UUID.String(), 10*time.Minute)
+	}
+	return user, nil
+```
+In `Logout`, also evict the cache:
+```go
+	if s.cache != nil {
+		s.cache.DeleteSession(context.Background(), auth.HashToken(rawToken))
+	}
+```
+> Imports: add `context` and `time` to `auth.go`. The existing service unit tests (Task 8) leave `cache` nil, so they keep passing unchanged — verify that.
+
+- [ ] **Step 6: Inject the cache into the service module (provider pattern)**
+
+Inspect `internal/service/module.go` to copy the existing `RepositoryProvider` pattern, then add a `CacheProvider`:
+```go
+type CacheProvider interface{ Cache() *cache.Cache }
+```
+Extend `NewModule` (or add a setter) so the service module receives the cache module, and in `Init` set `m.service.cache = m.cacheProvider.Cache()` only when non-nil. In `internal/application.go`, pass the `cacheModule` (registered in Task 13) into the service module's constructor.
+> The concrete `*cache.Cache` satisfies the unexported `sessionCache` interface structurally. Setting `m.service.cache` requires the field be assignable from the same package or via an exported setter — add `func (s *Service) SetCache(c sessionCache)` if `service.Service.cache` can't be set from the module file (same package → direct assignment is fine).
+
+- [ ] **Step 7: Build + full test suite + e2e with rate-limit check**
+
+```bash
+cd /Users/dodonovpavel/gateway_fm/REAL_WORLD_ASSETS/4-ol-do/webapp-1/backend
+go build ./... 2>&1 | head -20
+go test ./... 2>&1 | tail -20
+```
+Expected: builds; all non-integration tests PASS (service tests still green with nil cache; cache tests green via miniredis).
+
+- [ ] **Step 8: Commit**
+
+```bash
+cd /Users/dodonovpavel/gateway_fm/REAL_WORLD_ASSETS/4-ol-do
+git add webapp-1/backend/internal/cache webapp-1/backend/internal/service webapp-1/backend/internal/application.go webapp-1/backend/go.mod webapp-1/backend/go.sum
+git commit -m "Use Redis for session cache + login rate-limiting"
+```
+
+---
+
 ## Self-Review (completed by plan author)
 
 **Spec coverage (auth-relevant sections):**
 - §Auth (email+password, argon2id, httpOnly/Secure/SameSite cookie, token hash only) → Tasks 4,5,8,10,11,12 ✓
 - §Data model `users.password_hash`, `sessions` → Task 3, 6 ✓
 - §API `/auth/signup|login|logout|me` → Tasks 9, 11 ✓
-- §Security (argon2id, parametrized SQL via go-pg, CORS exact-origin+credentials, secrets via env, no PII/secret logging) → Tasks 4, 7, 12 ✓ (rate-limiting uses the template's existing `RateLimit` middleware; Redis deferred — see note)
+- §Security (argon2id, parametrized SQL via go-pg, CORS exact-origin+credentials, secrets via env, no PII/secret logging) → Tasks 4, 7, 12 ✓
+- §Redis (session cache + auth rate-limit) → Tasks 13, 14 ✓ (Redis is optional/nil-safe: the service degrades to Postgres-only and fail-open rate-limiting if the cache is disabled or unreachable)
 - Deferred to later plans: projects sync (Plan 2), entitlements (Plan 3), frontend (Plan 4). ✓
 
-**Deviations from spec, with rationale:**
-- **Redis dropped from this plan.** The design listed Redis for session cache + rate-limit. Sessions live in Postgres (source of truth), and the template already ships a `RateLimit` middleware. Adding Redis now is premature (YAGNI) for a single-instance MVP. If multi-instance rate-limiting or entitlement caching is needed later, add a cache module then. *Flagging because it diverges from the written spec — confirm this is acceptable.*
+**Deviations from spec:** None. Redis is included per the spec (Tasks 13–14). The template's generic `RateLimit` middleware remains for coarse per-request limiting; the Redis-backed limiter in Task 14 specifically protects login/signup against brute force (the security-relevant case).
 
 **Placeholder scan:** No `TODO`/`TBD`. Two steps intentionally say "confirm the real symbol name via grep, then match" — these are accuracy guards against template drift, not placeholders; each gives the expected name and the grep to verify it.
 
