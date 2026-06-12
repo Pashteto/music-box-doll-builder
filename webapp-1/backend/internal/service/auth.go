@@ -94,18 +94,12 @@ func (s *Service) Authenticate(rawToken string) (*models.User, error) {
 }
 
 func (s *Service) authenticateByHash(tokenHash string) (*models.User, error) {
-	// Cache fast-path: check Redis before hitting Postgres.
-	if s.cache != nil {
-		if uid, ok := s.cache.GetSessionUserID(context.Background(), tokenHash); ok {
-			if id, err := uuid.FromString(uid); err == nil {
-				if u, err := s.repository.UserByUUID(id); err == nil {
-					return u, nil
-				}
-			}
-		}
-	}
+	// Session row is the source of truth — always validated so revocation is prompt.
 	session, err := s.repository.SessionByTokenHash(tokenHash)
 	if err != nil || session == nil {
+		if s.cache != nil {
+			s.cache.DeleteSession(context.Background(), tokenHash) // evict any stale cache entry
+		}
 		return nil, ErrInvalidSession
 	}
 	if time.Now().After(session.ExpiresAt) {
@@ -115,11 +109,23 @@ func (s *Service) authenticateByHash(tokenHash string) (*models.User, error) {
 		}
 		return nil, ErrInvalidSession
 	}
+
+	// Cache only short-circuits the user lookup (not session validity).
+	if s.cache != nil {
+		if uid, ok := s.cache.GetSessionUserID(context.Background(), tokenHash); ok {
+			if id, err := uuid.FromString(uid); err == nil && id == session.UserUUID {
+				if u, err := s.repository.UserByUUID(id); err == nil && u != nil {
+					return u, nil
+				}
+			}
+		}
+	}
+
 	user, err := s.repository.UserByUUID(session.UserUUID)
 	if err != nil || user == nil {
 		return nil, ErrInvalidSession
 	}
-	// Populate cache for subsequent requests.
+	// Populate cache for subsequent user lookups.
 	if s.cache != nil {
 		s.cache.SetSessionUserID(context.Background(), tokenHash, user.UUID.String(), 10*time.Minute)
 	}
