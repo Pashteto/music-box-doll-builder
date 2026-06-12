@@ -36,9 +36,9 @@ func TestApp_Init_NoModules(t *testing.T) {
 		t.Errorf("Init should succeed with no modules: %v", err)
 	}
 
-	// Without database configured, only the service module should be registered
-	if app.modules.Count() != 1 {
-		t.Errorf("expected 1 module (service), got %d", app.modules.Count())
+	// Without database configured, cache + service modules should be registered
+	if app.modules.Count() != 2 {
+		t.Errorf("expected 2 modules (cache + service), got %d", app.modules.Count())
 	}
 
 	if app.Service() == nil {
@@ -113,8 +113,8 @@ func TestApp_RegisterModules_WithDatabase(t *testing.T) {
 		t.Fatalf("Init failed: %v", err)
 	}
 
-	if app.modules.Count() != 2 {
-		t.Errorf("expected 2 modules (repository + service), got %d", app.modules.Count())
+	if app.modules.Count() != 3 {
+		t.Errorf("expected 3 modules (repository + cache + service), got %d", app.modules.Count())
 	}
 
 	if app.Service() == nil {

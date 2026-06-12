@@ -13,6 +13,11 @@ services:
     volumes:
       - ./data/db/postgres:/var/lib/postgresql/data
 
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+
   migrate:
     image: migrate/migrate
     depends_on:
@@ -26,6 +31,7 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
+      - redis
     ports:
       - "8080:8080"   # HTTP REST API
       - "9090:9090"   # gRPC
@@ -46,3 +52,7 @@ services:
       GRPC_ENABLED: "true"
       GRPC_HOST: "0.0.0.0"
       GRPC_PORT: 9090
+      # Cache (Redis) configuration
+      CACHE_ENABLED: "true"
+      CACHE_HOST: redis
+      CACHE_PORT: "6379"
