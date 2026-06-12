@@ -1,0 +1,87 @@
+package service
+
+import (
+	"context"
+	"testing"
+
+	"github.com/gofrs/uuid"
+
+	"dollbuilder/internal/models"
+	"dollbuilder/internal/repository"
+)
+
+// moduleMockRepository is a simple in-memory repository for testing purposes.
+type moduleMockRepository struct{}
+
+func (m *moduleMockRepository) CreateUser(_ *models.User) error           { return nil }
+func (m *moduleMockRepository) UserBy(_ *models.User, _ repository.UserGetter) error {
+	return nil
+}
+func (m *moduleMockRepository) CreateUserWithPassword(_ *models.User) error {
+	return nil
+}
+func (m *moduleMockRepository) UserByEmail(_ string) (*models.User, error)   { return nil, nil }
+func (m *moduleMockRepository) UserByUUID(_ uuid.UUID) (*models.User, error) { return nil, nil }
+func (m *moduleMockRepository) CreateSession(_ *models.Session) error        { return nil }
+func (m *moduleMockRepository) SessionByTokenHash(_ string) (*models.Session, error) {
+	return nil, nil
+}
+func (m *moduleMockRepository) DeleteSession(_ string) error { return nil }
+
+// mockRepositoryProvider wraps a repository for testing.
+type mockRepositoryProvider struct {
+	repo repository.IRepository
+}
+
+func (m *mockRepositoryProvider) Repository() repository.IRepository {
+	return m.repo
+}
+
+func TestModule_Lifecycle_WithRepository(t *testing.T) {
+	ctx := context.Background()
+
+	repo := &moduleMockRepository{}
+	provider := &mockRepositoryProvider{repo: repo}
+	mod := NewModule(provider, nil)
+
+	if err := mod.Init(ctx); err != nil {
+		t.Fatalf("Init failed: %v", err)
+	}
+
+	if mod.Service() == nil {
+		t.Fatal("Service() returned nil")
+	}
+
+	if err := mod.Start(ctx); err != nil {
+		t.Fatalf("Start failed: %v", err)
+	}
+
+	if err := mod.HealthCheck(ctx); err != nil {
+		t.Fatalf("HealthCheck failed: %v", err)
+	}
+
+	if err := mod.Stop(ctx); err != nil {
+		t.Fatalf("Stop failed: %v", err)
+	}
+}
+
+func TestModule_Lifecycle_WithoutRepository(t *testing.T) {
+	ctx := context.Background()
+
+	mod := NewModule(nil, nil)
+
+	if err := mod.Init(ctx); err != nil {
+		t.Fatalf("Init failed: %v", err)
+	}
+
+	if mod.Service() == nil {
+		t.Fatal("Service() returned nil without repository")
+	}
+}
+
+func TestModule_Name(t *testing.T) {
+	mod := NewModule(nil, nil)
+	if got := mod.Name(); got != "service" {
+		t.Errorf("Name() = %q, want %q", got, "service")
+	}
+}
