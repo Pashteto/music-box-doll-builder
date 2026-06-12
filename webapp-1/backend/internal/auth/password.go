@@ -57,12 +57,21 @@ func VerifyPassword(password, encoded string) (bool, error) {
 	if _, err := fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &memory, &time, &threads); err != nil {
 		return false, ErrInvalidHash
 	}
+	if version != argon2.Version {
+		return false, ErrInvalidHash
+	}
+	if memory == 0 || time == 0 || threads == 0 {
+		return false, ErrInvalidHash
+	}
 	salt, err := base64.RawStdEncoding.DecodeString(parts[4])
 	if err != nil {
 		return false, ErrInvalidHash
 	}
 	want, err := base64.RawStdEncoding.DecodeString(parts[5])
 	if err != nil {
+		return false, ErrInvalidHash
+	}
+	if len(salt) == 0 || len(want) == 0 {
 		return false, ErrInvalidHash
 	}
 	got := argon2.IDKey([]byte(password), salt, time, memory, threads, uint32(len(want)))
