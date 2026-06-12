@@ -124,6 +124,13 @@ func (m *Module) initAPI() error {
 	api.UsersGetUserByEmailHandler = handlers.NewGetUserByEmail(m.service, m.grpcClient)
 	api.HealthGetHealthHandler = handlers.NewHealth()
 
+	// Auth handlers
+	cookie := handlers.NewCookieConfig("", false, 30*24*time.Hour) // TODO(Task 12): from config (m.config.Auth)
+	api.AuthSignupHandler = handlers.NewSignup(m.service, cookie)
+	api.AuthLoginHandler = handlers.NewLogin(m.service, cookie)
+	api.AuthLogoutHandler = handlers.NewLogout(m.service, cookie)
+	api.AuthGetMeHandler = handlers.NewGetMe(m.service)
+
 	// TODO: Add more handlers as you expand the API
 	// api.UsersCreateUserHandler = handlers.NewCreateUser(m.service)
 	// api.UsersUpdateUserHandler = handlers.NewUpdateUser(m.service)
