@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -33,7 +34,10 @@ func (s *Service) SignUp(email, password, userAgent string) (*models.User, error
 		Status:       models.UserActive,
 	}
 	if err := s.repository.CreateUserWithPassword(user); err != nil {
-		return nil, ErrEmailTaken
+		if strings.Contains(err.Error(), "duplicate key") || strings.Contains(err.Error(), "23505") {
+			return nil, ErrEmailTaken
+		}
+		return nil, fmt.Errorf("create user: %w", err)
 	}
 	return user, nil
 }
