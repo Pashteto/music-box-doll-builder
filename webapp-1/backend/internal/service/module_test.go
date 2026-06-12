@@ -42,7 +42,7 @@ func TestModule_Lifecycle_WithRepository(t *testing.T) {
 
 	repo := &moduleMockRepository{}
 	provider := &mockRepositoryProvider{repo: repo}
-	mod := NewModule(provider)
+	mod := NewModule(provider, nil)
 
 	if err := mod.Init(ctx); err != nil {
 		t.Fatalf("Init failed: %v", err)
@@ -68,7 +68,7 @@ func TestModule_Lifecycle_WithRepository(t *testing.T) {
 func TestModule_Lifecycle_WithoutRepository(t *testing.T) {
 	ctx := context.Background()
 
-	mod := NewModule(nil)
+	mod := NewModule(nil, nil)
 
 	if err := mod.Init(ctx); err != nil {
 		t.Fatalf("Init failed: %v", err)
@@ -80,7 +80,7 @@ func TestModule_Lifecycle_WithoutRepository(t *testing.T) {
 }
 
 func TestModule_Name(t *testing.T) {
-	mod := NewModule(nil)
+	mod := NewModule(nil, nil)
 	if got := mod.Name(); got != "service" {
 		t.Errorf("Name() = %q, want %q", got, "service")
 	}

@@ -4,6 +4,7 @@ package service
 import (
 	"context"
 
+	"dollbuilder/internal/cache"
 	"dollbuilder/internal/repository"
 	"dollbuilder/pkg/logger"
 )
@@ -14,18 +15,27 @@ type RepositoryProvider interface {
 	Repository() repository.IRepository
 }
 
+// CacheProvider supplies an optional session cache.
+// *cache.Module satisfies this interface (Cache() returns nil when disabled).
+type CacheProvider interface {
+	Cache() *cache.Cache
+}
+
 // Module implements module.Module interface for the service layer.
 // It wires the business logic service with optional dependencies such as repository.
 type Module struct {
-	repoProvider RepositoryProvider
-	service      IService
+	repoProvider  RepositoryProvider
+	cacheProvider CacheProvider
+	service       IService
 }
 
 // NewModule creates a new service module instance.
 // repoProvider can be nil when the database module is not enabled.
-func NewModule(repoProvider RepositoryProvider) *Module {
+// cacheProvider can be nil when the cache module is not wired in.
+func NewModule(repoProvider RepositoryProvider, cacheProvider CacheProvider) *Module {
 	return &Module{
-		repoProvider: repoProvider,
+		repoProvider:  repoProvider,
+		cacheProvider: cacheProvider,
 	}
 }
 
@@ -44,7 +54,17 @@ func (m *Module) Init(_ context.Context) error {
 		repo = m.repoProvider.Repository()
 	}
 
-	m.service = NewService(repo)
+	svc := NewService(repo)
+
+	// Attach optional session cache (nil-safe: service works without it).
+	if m.cacheProvider != nil {
+		if c := m.cacheProvider.Cache(); c != nil {
+			svc.(*Service).SetCache(c)
+			logger.Log().Info("service initialized with session cache")
+		}
+	}
+
+	m.service = svc
 
 	if repo == nil {
 		logger.Log().Warn("service initialized without repository; database operations will be unavailable")

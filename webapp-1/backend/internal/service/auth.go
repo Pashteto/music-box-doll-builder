@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -10,6 +11,17 @@ import (
 	"dollbuilder/internal/auth"
 	"dollbuilder/internal/models"
 )
+
+// sessionCache is the optional Redis cache; nil-safe (service works without it).
+type sessionCache interface {
+	GetSessionUserID(ctx context.Context, tokenHash string) (string, bool)
+	SetSessionUserID(ctx context.Context, tokenHash, userID string, ttl time.Duration)
+	DeleteSession(ctx context.Context, tokenHash string)
+	AllowLoginAttempt(ctx context.Context, id string, limit int64, window time.Duration) bool
+}
+
+// SetCache attaches an optional session cache (nil-safe).
+func (s *Service) SetCache(c sessionCache) { s.cache = c }
 
 const sessionTTL = 30 * 24 * time.Hour
 
@@ -45,6 +57,9 @@ func (s *Service) SignUp(email, password, userAgent string) (*models.User, error
 // Login verifies credentials and creates a session; returns the raw token.
 func (s *Service) Login(email, password, userAgent string) (*models.User, string, error) {
 	email = strings.ToLower(strings.TrimSpace(email))
+	if s.cache != nil && !s.cache.AllowLoginAttempt(context.Background(), email, 10, 15*time.Minute) {
+		return nil, "", ErrInvalidCredentials // do not reveal rate-limit state
+	}
 	user, err := s.repository.UserByEmail(email)
 	if err != nil || user == nil || user.PasswordHash == "" {
 		return nil, "", ErrInvalidCredentials
@@ -79,22 +94,42 @@ func (s *Service) Authenticate(rawToken string) (*models.User, error) {
 }
 
 func (s *Service) authenticateByHash(tokenHash string) (*models.User, error) {
+	// Cache fast-path: check Redis before hitting Postgres.
+	if s.cache != nil {
+		if uid, ok := s.cache.GetSessionUserID(context.Background(), tokenHash); ok {
+			if id, err := uuid.FromString(uid); err == nil {
+				if u, err := s.repository.UserByUUID(id); err == nil {
+					return u, nil
+				}
+			}
+		}
+	}
 	session, err := s.repository.SessionByTokenHash(tokenHash)
 	if err != nil || session == nil {
 		return nil, ErrInvalidSession
 	}
 	if time.Now().After(session.ExpiresAt) {
 		_ = s.repository.DeleteSession(tokenHash)
+		if s.cache != nil {
+			s.cache.DeleteSession(context.Background(), tokenHash)
+		}
 		return nil, ErrInvalidSession
 	}
 	user, err := s.repository.UserByUUID(session.UserUUID)
 	if err != nil || user == nil {
 		return nil, ErrInvalidSession
 	}
+	// Populate cache for subsequent requests.
+	if s.cache != nil {
+		s.cache.SetSessionUserID(context.Background(), tokenHash, user.UUID.String(), 10*time.Minute)
+	}
 	return user, nil
 }
 
 // Logout deletes the session for a raw token.
 func (s *Service) Logout(rawToken string) error {
+	if s.cache != nil {
+		s.cache.DeleteSession(context.Background(), auth.HashToken(rawToken))
+	}
 	return s.repository.DeleteSession(auth.HashToken(rawToken))
 }

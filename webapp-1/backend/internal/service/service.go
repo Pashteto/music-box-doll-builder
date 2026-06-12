@@ -36,14 +36,9 @@ type IService interface {
 type Service struct {
 	repository repository.IRepository
 
-	// TODO: Add more dependencies as optional when implementing
-	// Example:
-	// sessions ISessions  // Session management (optional)
-	// cache    ICache     // Caching layer (optional)
-	// logger   ILogger    // Structured logging (optional)
-	//
-	// All dependencies should be optional and service should
-	// gracefully handle their absence. Check for nil before using.
+	// cache is the optional Redis session cache. Nil when cache is disabled.
+	// All cache accesses are guarded by nil checks so the service works without it.
+	cache sessionCache
 }
 
 // NewService creates a new service instance.
