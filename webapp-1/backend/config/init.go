@@ -29,7 +29,7 @@ func setDefaults() {
 	viper.SetDefault("database.conn_max_lifetime", 300)
 	viper.SetDefault("database.user", "dev")
 	viper.SetDefault("database.password", "dev")
-	viper.SetDefault("database.name", "microservices_dev")
+	viper.SetDefault("database.name", "dollbuilder_dev")
 
 	// gRPC module defaults
 	viper.SetDefault("grpc.enabled", false)

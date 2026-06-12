@@ -57,7 +57,7 @@ DATABASE_HOST ?= localhost
 DATABASE_PORT ?= 5432
 DATABASE_USER ?= dev
 DATABASE_PASSWORD ?= dev
-DATABASE_NAME ?= microservice_dev
+DATABASE_NAME ?= dollbuilder_dev
 DATABASE_SSL_MODE ?= disable
 
 # Construct DATABASE_URL from parts
