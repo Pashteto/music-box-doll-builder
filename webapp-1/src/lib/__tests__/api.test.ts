@@ -15,7 +15,7 @@ describe('apiFetch', () => {
     const body = await apiFetch<{ ok: boolean }>('/api/v1/thing')
 
     expect(body).toEqual({ ok: true })
-    const [, opts] = fetchMock.mock.calls[0]
+    const [, opts] = fetchMock.mock.calls[0]!
     expect(opts.credentials).toBe('include')
     expect(opts.headers['Content-Type']).toBe('application/json')
   })
@@ -46,8 +46,20 @@ describe('apiFetch', () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }))
     vi.stubGlobal('fetch', fetchMock)
     await apiFetch('/x', { headers: { 'X-Test': '1' } })
-    const [, opts] = fetchMock.mock.calls[0]
+    const [, opts] = fetchMock.mock.calls[0]!
     expect(opts.credentials).toBe('include')
     expect(opts.headers['X-Test']).toBe('1')
+  })
+
+  it('throws ApiError carrying raw text when the error body is not JSON', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(new Response('<html>502 Bad Gateway</html>', { status: 502 })),
+    )
+    await expect(apiFetch('/api/v1/projects')).rejects.toMatchObject({
+      name: 'ApiError',
+      status: 502,
+      body: '<html>502 Bad Gateway</html>',
+    })
   })
 })
