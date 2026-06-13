@@ -15,8 +15,10 @@ export async function syncOnLogin(): Promise<void> {
     const [local, serverRaw] = await Promise.all([listProjects(), projectsApi.list()])
     const server = serverRaw.map(fromServerProject)
     const { toApply, toPush } = mergeProjects(local, server)
-    await Promise.all(toApply.map((p) => saveProject(p)))
-    await Promise.all(toPush.map((p) => projectsApi.upsert(p.id, toProjectInput(p))))
+    // Per-project best-effort: one failure (IndexedDB quota, a 5xx) must not drop
+    // the rest of the batch, so allSettled rather than all.
+    await Promise.allSettled(toApply.map((p) => saveProject(p)))
+    await Promise.allSettled(toPush.map((p) => projectsApi.upsert(p.id, toProjectInput(p))))
   } catch {
     // best-effort — IndexedDB remains the source of truth
   }

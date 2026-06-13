@@ -1,7 +1,12 @@
 import type { DollProject } from '@/lib/types'
 import type { ServerProject, ProjectInput } from '@/lib/api'
 
-/** Client DollProject → server upsert payload. Epoch-ms `updatedAt` → RFC3339. */
+/**
+ * Client DollProject → server upsert payload. Epoch-ms `updatedAt` → RFC3339.
+ * The full project rides in `data`, so its embedded `id`/`updatedAt`/`thumbnailDataUrl`
+ * are informational only — the server columns (`uuid`/`updated_at`/`thumbnail`) are
+ * authoritative on the way back (see fromServerProject).
+ */
 export function toProjectInput(p: DollProject): ProjectInput {
   return {
     name: p.name,
