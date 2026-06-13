@@ -46,7 +46,13 @@ function SignupInner() {
 
 export default function SignupPage() {
   return (
-    <Suspense>
+    <Suspense
+      fallback={
+        <main className="flex min-h-full items-center justify-center">
+          <span className="text-foreground/50">Loading…</span>
+        </main>
+      }
+    >
       <SignupInner />
     </Suspense>
   )

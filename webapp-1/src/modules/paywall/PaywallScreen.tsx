@@ -15,6 +15,7 @@ export function PaywallScreen({ onClose }: PaywallScreenProps) {
   const user = useAppStore((s) => s.user)
   const mockCheckout = useAppStore((s) => s.mockCheckout)
   const [pending, setPending] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleUnlock = async () => {
     if (!user) {
@@ -22,9 +23,13 @@ export function PaywallScreen({ onClose }: PaywallScreenProps) {
       return
     }
     setPending(true)
+    setError(null)
     try {
       await mockCheckout()
       onClose()
+    } catch {
+      // Entitlements backend may be unavailable (Plan 3 not deployed) — never crash.
+      setError('Unlocking is unavailable right now. Please try again later.')
     } finally {
       setPending(false)
     }
@@ -46,6 +51,11 @@ export function PaywallScreen({ onClose }: PaywallScreenProps) {
         >
           {pending ? 'Unlocking…' : user ? 'Unlock Export' : 'Log in to unlock'}
         </button>
+        {error ? (
+          <p role="alert" className="mt-3 text-sm text-danger">
+            {error}
+          </p>
+        ) : null}
         <button
           type="button"
           onClick={onClose}
