@@ -2,5 +2,6 @@
 import type { CompositionSlice } from '@/store/compositionSlice'
 import type { EditorSlice } from '@/store/editorSlice'
 import type { EntitlementSlice } from '@/store/entitlementSlice'
+import type { SessionSlice } from '@/store/sessionSlice'
 
-export type AppState = CompositionSlice & EditorSlice & EntitlementSlice
+export type AppState = CompositionSlice & EditorSlice & EntitlementSlice & SessionSlice

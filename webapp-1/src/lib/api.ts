@@ -41,3 +41,32 @@ export async function apiFetch<T>(path: string, opts: RequestInit = {}): Promise
   if (!res.ok) throw new ApiError(res.status, body)
   return body as T
 }
+
+export interface ApiUser {
+  uuid: string
+  email: string
+  name: string
+  status: 'active' | 'deleted'
+  created_at?: string
+  updated_at?: string
+}
+
+export interface AuthResult {
+  user: ApiUser
+}
+
+export const authApi = {
+  signup: (email: string, password: string) =>
+    apiFetch<AuthResult>('/api/v1/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }),
+  login: (email: string, password: string) =>
+    apiFetch<AuthResult>('/api/v1/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }),
+  logout: () => apiFetch<null>('/api/v1/auth/logout', { method: 'POST' }),
+  // /auth/me returns a BARE User (not wrapped in { user }).
+  me: () => apiFetch<ApiUser>('/api/v1/auth/me'),
+}
