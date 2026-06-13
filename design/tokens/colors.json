@@ -1,0 +1,107 @@
+{
+  "$meta": {
+    "name": "linden_tar — Music Box Doll Builder color tokens",
+    "description": "Gallery-grade palette inspired by Olga Grechanova's ceramic doll work. Warm near-black vitrine backgrounds, gypsum/porcelain whites, blood-crimson, burnt-orange flesh accents, ceramic-green glaze. Built for a dark-first mobile UI.",
+    "version": "0.1.0",
+    "themePreference": "dark"
+  },
+
+  "raw": {
+    "ink": {
+      "$comment": "Warm near-black background scale. Not pure #000 — carries a faint clay warmth, like an unlit gallery.",
+      "950": { "hex": "#0B0907", "note": "Deepest base — page background, behind everything." },
+      "900": { "hex": "#12100D", "note": "Primary app background / gallery floor." },
+      "800": { "hex": "#1B1814", "note": "Raised surface — cards, panels, vitrine interior." },
+      "700": { "hex": "#26211B", "note": "Higher surface / pressed states / input fills." },
+      "600": { "hex": "#352E26", "note": "Hairline borders, dividers, glaze edges." },
+      "500": { "hex": "#4A4137", "note": "Disabled fills, faint strokes." }
+    },
+    "porcelain": {
+      "$comment": "Gypsum / bone / glaze whites. Never #FFF — always slightly warm and dimmed, like fired clay under low light.",
+      "50": { "hex": "#F6F1E9", "note": "Primary text on dark — warm bone white." },
+      "100": { "hex": "#EBE3D7", "note": "Headings, brightest porcelain highlight." },
+      "200": { "hex": "#D6CBBA", "note": "Secondary text." },
+      "300": { "hex": "#B6A992", "note": "Tertiary / muted clay text, captions." },
+      "400": { "hex": "#8C7F6B", "note": "Placeholder, disabled text, faint labels." }
+    },
+    "crimson": {
+      "$comment": "Blood-crimson — the red hooded cloak and red-glazed lips. The single loud color; use sparingly as the call to action.",
+      "300": { "hex": "#D9596A", "note": "Hover / lighter crimson, focus glow." },
+      "400": { "hex": "#C03A4A", "note": "Crimson highlight, links on dark." },
+      "500": { "hex": "#A11D2C", "note": "Primary crimson — main CTA fill." },
+      "600": { "hex": "#841421", "note": "Pressed CTA / deep glaze red." },
+      "700": { "hex": "#5E0E18", "note": "Crimson shadow, blood-in-shadow." }
+    },
+    "ember": {
+      "$comment": "Burnt-orange flesh / lip accent. Warm secondary, used for soft highlights and warnings.",
+      "300": { "hex": "#E2935C", "note": "Light ember highlight." },
+      "400": { "hex": "#C9743C", "note": "Ember accent — secondary emphasis." },
+      "500": { "hex": "#A85A28", "note": "Deep burnt-orange." }
+    },
+    "verdigris": {
+      "$comment": "Ceramic-green glaze — green-painted brows, sage glaze. Cool counterpoint to the warm palette; success / selected.",
+      "300": { "hex": "#7FA38C", "note": "Light glaze green." },
+      "400": { "hex": "#5C8270", "note": "Verdigris accent — selected / success." },
+      "500": { "hex": "#3E5E50", "note": "Deep ceramic-green glaze." }
+    },
+    "clay": {
+      "$comment": "Muted flesh / clay tone — neutral warm midtone for soft surfaces and progress.",
+      "300": { "hex": "#C7A98F", "note": "Light clay." },
+      "400": { "hex": "#A8835F", "note": "Clay midtone." }
+    }
+  },
+
+  "semantic": {
+    "background": {
+      "base": { "ref": "raw.ink.950", "hex": "#0B0907", "note": "Outermost page background." },
+      "default": { "ref": "raw.ink.900", "hex": "#12100D", "note": "App canvas / gallery floor." },
+      "subtle": { "ref": "raw.ink.800", "hex": "#1B1814", "note": "Inset regions, scene stage backdrop." }
+    },
+    "surface": {
+      "raised": { "ref": "raw.ink.800", "hex": "#1B1814", "note": "Cards, sheets, catalog tiles." },
+      "overlay": { "ref": "raw.ink.700", "hex": "#26211B", "note": "Modals, popovers, pressed tiles." },
+      "scrim": { "hex": "rgba(7,6,5,0.72)", "note": "Backdrop behind modals — dims the gallery." }
+    },
+    "border": {
+      "hairline": { "ref": "raw.ink.600", "hex": "#352E26", "note": "Default 1px borders, dividers." },
+      "glaze": { "hex": "rgba(246,241,233,0.14)", "note": "Porcelain edge highlight — top of raised surfaces, vitrine frame." },
+      "focus": { "ref": "raw.crimson.400", "hex": "#C03A4A", "note": "Focus ring color." }
+    },
+    "text": {
+      "primary": { "ref": "raw.porcelain.50", "hex": "#F6F1E9", "note": "Body text on dark. Contrast vs #12100D ≈ 13.4:1 (AAA)." },
+      "heading": { "ref": "raw.porcelain.100", "hex": "#EBE3D7", "note": "Display / headings. Contrast vs #12100D ≈ 12.0:1 (AAA)." },
+      "secondary": { "ref": "raw.porcelain.200", "hex": "#D6CBBA", "note": "Secondary copy. Contrast vs #12100D ≈ 9.6:1 (AAA)." },
+      "muted": { "ref": "raw.porcelain.300", "hex": "#B6A992", "note": "Captions, labels. Contrast vs #12100D ≈ 6.6:1 (AA, AAA for large)." },
+      "faint": { "ref": "raw.porcelain.400", "hex": "#8C7F6B", "note": "Placeholder / disabled. Contrast vs #12100D ≈ 3.9:1 — large text / non-essential only." },
+      "onCrimson": { "ref": "raw.porcelain.50", "hex": "#F6F1E9", "note": "Text on crimson CTA. Contrast vs #A11D2C ≈ 6.3:1 (AA)." },
+      "link": { "ref": "raw.crimson.300", "hex": "#D9596A", "note": "Inline links on dark. Contrast vs #12100D ≈ 4.9:1 (AA)." }
+    },
+    "primary": {
+      "default": { "ref": "raw.crimson.500", "hex": "#A11D2C", "note": "Primary CTA fill (Begin, Unlock, Export)." },
+      "hover": { "ref": "raw.crimson.400", "hex": "#C03A4A", "note": "Primary hover." },
+      "active": { "ref": "raw.crimson.600", "hex": "#841421", "note": "Primary pressed." },
+      "subtle": { "hex": "rgba(161,29,44,0.16)", "note": "Crimson tint fill — selected chip, soft badge." },
+      "ring": { "hex": "rgba(192,58,74,0.45)", "note": "Crimson focus glow." }
+    },
+    "accent": {
+      "ember": { "ref": "raw.ember.400", "hex": "#C9743C", "note": "Secondary accent — warm highlight, warning." },
+      "emberSubtle": { "hex": "rgba(201,116,60,0.16)", "note": "Ember tint fill." },
+      "verdigris": { "ref": "raw.verdigris.400", "hex": "#5C8270", "note": "Selected / success accent." },
+      "verdigrisSubtle": { "hex": "rgba(92,130,112,0.18)", "note": "Verdigris tint fill — selected slot." },
+      "clay": { "ref": "raw.clay.400", "hex": "#A8835F", "note": "Neutral warm accent — progress track fill." }
+    },
+    "state": {
+      "success": { "ref": "raw.verdigris.400", "hex": "#5C8270", "note": "Saved / complete." },
+      "warning": { "ref": "raw.ember.400", "hex": "#C9743C", "note": "Caution / limited exports remaining." },
+      "danger": { "ref": "raw.crimson.500", "hex": "#A11D2C", "note": "Destructive / error." },
+      "info": { "ref": "raw.clay.300", "hex": "#C7A98F", "note": "Neutral info." }
+    },
+    "stage": {
+      "$comment": "Tokens for the 3D doll stage / vitrine — see README for material guidance.",
+      "vitrineFloor": { "hex": "#0E0C0A", "note": "Floor of the 3D stage — darker than the app bg." },
+      "spotlight": { "hex": "rgba(246,241,233,0.10)", "note": "Dim overhead gallery light — radial glow center-top." },
+      "gypsum": { "ref": "raw.porcelain.100", "hex": "#EBE3D7", "note": "Base albedo for gypsum/porcelain doll material." },
+      "rimLight": { "ref": "raw.ember.300", "hex": "#E2935C", "note": "Warm rim light grazing the doll edge." }
+    }
+  }
+}

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>linden_tar — assemble a doll from the inner forest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Mulish:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../tokens/tokens.css" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background: var(--color-bg-base);
+    -webkit-font-smoothing: antialiased;
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    padding: 24px;
+    background-image:
+      radial-gradient(120% 60% at 50% -8%, rgba(201,116,60,0.05), transparent 55%),
+      radial-gradient(80% 50% at 50% 110%, rgba(94,14,24,0.10), transparent 60%);
+  }
+
+  /* ---- mobile frame ---- */
+  .frame {
+    position: relative;
+    width: 100%;
+    max-width: var(--frame-max);
+    min-height: 860px;
+    border-radius: 30px;
+    overflow: hidden;
+    background:
+      radial-gradient(110% 55% at 50% 0%, rgba(246,241,233,0.06), transparent 50%),
+      linear-gradient(180deg, var(--ink-900) 0%, var(--ink-950) 100%);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-lg), var(--shadow-glaze);
+    isolation: isolate;
+  }
+  /* film grain */
+  .frame::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 6;
+    opacity: 0.045; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---- top status / brand bar ---- */
+  .topbar {
+    position: relative; z-index: 4;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 22px 0;
+  }
+  .brand {
+    font-family: var(--font-mono);
+    font-size: var(--fs-mono-sm);
+    letter-spacing: var(--tracking-widest);
+    text-transform: lowercase;
+    color: var(--color-text-muted);
+  }
+  .brand b { color: var(--color-text-secondary); font-weight: 500; }
+  .topbar .vitrine-tag {
+    font-size: var(--fs-label-sm); letter-spacing: var(--tracking-wider);
+    text-transform: uppercase; color: var(--color-text-faint);
+    border: 1px solid var(--color-border); border-radius: var(--radius-pill);
+    padding: 5px 11px;
+  }
+
+  /* ---- the vitrine / doll stage ---- */
+  .stage {
+    position: relative; z-index: 2;
+    margin: 26px 22px 0;
+    height: 380px;
+    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(90% 60% at 50% 14%, var(--stage-spotlight), transparent 60%),
+      linear-gradient(180deg, #161310 0%, var(--stage-floor) 100%);
+    border: 1px solid var(--color-border);
+    box-shadow: inset 0 1px 0 var(--color-border-glaze), inset 0 -40px 80px -40px #000;
+    overflow: hidden;
+    display: grid; place-items: center;
+  }
+  /* vitrine glass reflection sweep */
+  .stage::before {
+    content:""; position:absolute; inset:0;
+    background: linear-gradient(115deg, transparent 30%, rgba(246,241,233,0.05) 46%, transparent 54%);
+    animation: sweep 7s var(--ease-standard) infinite;
+  }
+  @keyframes sweep { 0%,70%{transform:translateX(-30%);opacity:0} 80%{opacity:1} 100%{transform:translateX(30%);opacity:0} }
+
+  /* placeholder "porcelain doll head" built from CSS — stand-in for the R3F demo */
+  .doll {
+    position: relative; width: 168px; height: 232px;
+    filter: drop-shadow(0 30px 30px rgba(0,0,0,0.6));
+    animation: float 6s var(--ease-standard) infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-10px) rotate(1deg)} }
+  .doll .head {
+    position:absolute; left:50%; top:0; transform:translateX(-50%);
+    width:124px; height:150px; border-radius:60px 60px 56px 56px;
+    background:
+      radial-gradient(60% 40% at 38% 30%, rgba(246,241,233,0.9), transparent 60%),
+      linear-gradient(160deg, var(--porcelain-100), #cdbfa9 70%, #a9967f);
+    box-shadow: inset -8px -10px 22px rgba(0,0,0,0.30), inset 6px 6px 14px rgba(255,255,255,0.25);
+  }
+  /* hairline crack — the unsettling detail */
+  .doll .head::after {
+    content:""; position:absolute; left:54%; top:18%; width:1.5px; height:46%;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.45), transparent);
+    transform: rotate(8deg);
+  }
+  .doll .eyes { position:absolute; left:50%; top:62px; transform:translateX(-50%); display:flex; gap:22px; }
+  .doll .eye { width:13px; height:9px; border-radius:50%; background:#1b1410; box-shadow:0 0 0 2px rgba(0,0,0,0.15); }
+  .doll .brow { position:absolute; left:50%; top:52px; transform:translateX(-50%); display:flex; gap:22px; }
+  .doll .brow span { width:18px; height:3px; border-radius:2px; background:var(--verdigris-400); opacity:0.85; }
+  .doll .lips { position:absolute; left:50%; top:96px; transform:translateX(-50%); width:24px; height:11px;
+    border-radius:0 0 14px 14px; background:linear-gradient(180deg,var(--crimson-500),var(--crimson-700)); }
+  /* red cloak / collar */
+  .doll .cloak {
+    position:absolute; left:50%; bottom:0; transform:translateX(-50%);
+    width:160px; height:104px; border-radius:80px 80px 22px 22px;
+    background: linear-gradient(165deg, var(--crimson-500), var(--crimson-700));
+    box-shadow: inset 0 8px 18px rgba(255,255,255,0.10), inset 0 -12px 24px rgba(0,0,0,0.5);
+  }
+  .doll .cloak::before { /* hood opening shadow */
+    content:""; position:absolute; left:50%; top:-6px; transform:translateX(-50%);
+    width:96px; height:40px; border-radius:50%; background:rgba(0,0,0,0.35);
+  }
+
+  .stage .caption {
+    position:absolute; left:0; right:0; bottom:14px; text-align:center;
+    font-family:var(--font-display); font-style:italic; font-weight:400;
+    font-size: var(--fs-serif-italic); color: var(--color-text-muted);
+    letter-spacing: 0.01em; z-index:3;
+  }
+
+  /* ---- hero copy ---- */
+  .hero { position:relative; z-index:3; padding: 30px 26px 0; text-align:center; }
+  .eyebrow {
+    font-size: var(--fs-label); letter-spacing: var(--tracking-wider);
+    text-transform: uppercase; color: var(--color-accent-ember); font-weight: var(--fw-semibold);
+    display:inline-flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before, .eyebrow::after { content:""; width:22px; height:1px; background:var(--color-border); }
+  .hero h1 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: var(--fs-display-2xl); line-height: var(--leading-display);
+    letter-spacing: var(--tracking-tighter); color: var(--color-text-heading);
+    margin: 16px 0 14px; font-optical-sizing: auto;
+  }
+  .hero h1 em { font-style: italic; color: var(--color-text); }
+  .hero p {
+    font-size: var(--fs-body-md); color: var(--color-text-secondary);
+    line-height: var(--leading-relaxed); max-width: 34ch; margin: 0 auto;
+  }
+
+  /* ---- CTA ---- */
+  .actions { position:relative; z-index:3; padding: 26px 26px 18px; display:grid; gap:12px; }
+  .btn {
+    appearance:none; border:none; cursor:pointer; font-family:var(--font-body);
+    min-height: var(--tap-min); border-radius: var(--radius-pill);
+    font-size: var(--fs-body-md); font-weight: var(--fw-semibold);
+    letter-spacing: 0.01em; transition: transform var(--dur-fast) var(--ease-standard),
+      background var(--dur-base) var(--ease-standard), box-shadow var(--dur-base);
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  }
+  .btn:active { transform: translateY(1px) scale(0.99); }
+  .btn-primary {
+    background: linear-gradient(180deg, var(--crimson-500), var(--crimson-600));
+    color: var(--color-text-on-crimson);
+    box-shadow: var(--glow-crimson), var(--shadow-glaze);
+  }
+  .btn-primary:hover { background: linear-gradient(180deg, var(--crimson-400), var(--crimson-500)); }
+  .btn-ghost {
+    background: transparent; color: var(--color-text-secondary);
+    border: 1px solid var(--color-border); box-shadow: var(--shadow-glaze);
+  }
+  .btn-ghost:hover { border-color: var(--color-border-glaze); color: var(--color-text); }
+  .btn .dot { width:7px; height:7px; border-radius:50%; background:currentColor; opacity:0.7; }
+
+  .footnote {
+    position:relative; z-index:3; text-align:center; padding: 6px 26px 26px;
+    color: var(--color-text-faint); font-size: var(--fs-body-sm);
+  }
+  .footnote a { color: var(--color-link); text-decoration: none; border-bottom:1px solid rgba(217,89,106,0.3); }
+
+  /* entrance stagger */
+  .reveal { opacity:0; transform: translateY(14px); animation: rise var(--dur-veil) var(--ease-emphasis) forwards; }
+  .d1{animation-delay:.05s}.d2{animation-delay:.20s}.d3{animation-delay:.38s}.d4{animation-delay:.55s}.d5{animation-delay:.70s}
+  @keyframes rise { to { opacity:1; transform:none; } }
+
+  @media (max-width: 380px){ .frame{min-height:auto} }
+</style>
+</head>
+<body>
+  <main class="frame tex-grain">
+    <header class="topbar reveal d1">
+      <span class="brand">linden<b>_tar</b></span>
+      <span class="vitrine-tag">vitrine · i</span>
+    </header>
+
+    <section class="stage reveal d2" aria-label="3D doll preview (placeholder for R3F demo)">
+      <div class="doll" role="img" aria-label="Porcelain doll in a red cloak">
+        <div class="head"></div>
+        <div class="brow"><span></span><span></span></div>
+        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+        <div class="lips"></div>
+        <div class="cloak"></div>
+      </div>
+      <p class="caption">a goodnight kiss from the inner forest</p>
+    </section>
+
+    <section class="hero">
+      <span class="eyebrow reveal d3">after Olga Grechanova</span>
+      <h1 class="reveal d3">Assemble a doll<br /><em>that remembers you</em></h1>
+      <p class="reveal d4">Choose her face, her hair, the glaze of her lips. Set her in the music box and let her turn — then keep the little film she leaves behind.</p>
+    </section>
+
+    <section class="actions">
+      <button class="btn btn-primary reveal d4"><span class="dot"></span>Begin the assembly</button>
+      <button class="btn btn-ghost reveal d5">Wander the gallery first</button>
+    </section>
+
+    <p class="footnote reveal d5">A tribute to the ceramic work of <a href="#">@linden_tar</a>. First film is free.</p>
+  </main>
+</body>
+</html>

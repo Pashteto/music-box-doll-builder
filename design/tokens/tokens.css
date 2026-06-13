@@ -1,0 +1,197 @@
+/* =====================================================================
+   linden_tar — Music Box Doll Builder
+   Design tokens as CSS custom properties.
+   Dark-first. Drop into globals.css or import as-is.
+   Source of truth: design/tokens/colors.json + typography.json
+   ===================================================================== */
+
+:root {
+  /* ---- Raw color scales ------------------------------------------- */
+  /* Ink — warm near-black backgrounds */
+  --ink-950: #0B0907;
+  --ink-900: #12100D;
+  --ink-800: #1B1814;
+  --ink-700: #26211B;
+  --ink-600: #352E26;
+  --ink-500: #4A4137;
+
+  /* Porcelain — gypsum / bone whites */
+  --porcelain-50:  #F6F1E9;
+  --porcelain-100: #EBE3D7;
+  --porcelain-200: #D6CBBA;
+  --porcelain-300: #B6A992;
+  --porcelain-400: #8C7F6B;
+
+  /* Crimson — blood red cloak / glazed lips */
+  --crimson-300: #D9596A;
+  --crimson-400: #C03A4A;
+  --crimson-500: #A11D2C;
+  --crimson-600: #841421;
+  --crimson-700: #5E0E18;
+
+  /* Ember — burnt-orange flesh accent */
+  --ember-300: #E2935C;
+  --ember-400: #C9743C;
+  --ember-500: #A85A28;
+
+  /* Verdigris — ceramic-green glaze */
+  --verdigris-300: #7FA38C;
+  --verdigris-400: #5C8270;
+  --verdigris-500: #3E5E50;
+
+  /* Clay — muted flesh midtone */
+  --clay-300: #C7A98F;
+  --clay-400: #A8835F;
+
+  /* ---- Semantic tokens -------------------------------------------- */
+  /* Background */
+  --color-bg-base:    var(--ink-950);
+  --color-bg:         var(--ink-900);
+  --color-bg-subtle:  var(--ink-800);
+
+  /* Surface */
+  --color-surface:         var(--ink-800);
+  --color-surface-overlay: var(--ink-700);
+  --color-scrim:           rgba(7, 6, 5, 0.72);
+
+  /* Border */
+  --color-border:        var(--ink-600);
+  --color-border-glaze:  rgba(246, 241, 233, 0.14);
+  --color-border-focus:  var(--crimson-400);
+
+  /* Text */
+  --color-text:          var(--porcelain-50);
+  --color-text-heading:  var(--porcelain-100);
+  --color-text-secondary:var(--porcelain-200);
+  --color-text-muted:    var(--porcelain-300);
+  --color-text-faint:    var(--porcelain-400);
+  --color-text-on-crimson: var(--porcelain-50);
+  --color-link:          var(--crimson-300);
+
+  /* Primary (crimson) */
+  --color-primary:        var(--crimson-500);
+  --color-primary-hover:  var(--crimson-400);
+  --color-primary-active: var(--crimson-600);
+  --color-primary-subtle: rgba(161, 29, 44, 0.16);
+  --color-primary-ring:   rgba(192, 58, 74, 0.45);
+
+  /* Accents */
+  --color-accent-ember:         var(--ember-400);
+  --color-accent-ember-subtle:  rgba(201, 116, 60, 0.16);
+  --color-accent-verdigris:        var(--verdigris-400);
+  --color-accent-verdigris-subtle: rgba(92, 130, 112, 0.18);
+  --color-accent-clay:          var(--clay-400);
+
+  /* State */
+  --color-success: var(--verdigris-400);
+  --color-warning: var(--ember-400);
+  --color-danger:  var(--crimson-500);
+  --color-info:    var(--clay-300);
+
+  /* 3D stage / vitrine */
+  --stage-floor:     #0E0C0A;
+  --stage-spotlight: rgba(246, 241, 233, 0.10);
+  --stage-gypsum:    var(--porcelain-100);
+  --stage-rim:       var(--ember-300);
+
+  /* ---- Typography ------------------------------------------------- */
+  --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-body:    'Mulish', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono:    'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Fluid type scale */
+  --fs-display-2xl: clamp(2.75rem, 9vw, 3.25rem);
+  --fs-display-xl:  clamp(2.1rem, 7vw, 2.5rem);
+  --fs-display-lg:  1.875rem;
+  --fs-display-md:  1.5rem;
+  --fs-serif-italic:1.125rem;
+  --fs-body-lg:     1.0625rem;
+  --fs-body-md:     0.9375rem;
+  --fs-body-sm:     0.8125rem;
+  --fs-label:       0.75rem;
+  --fs-label-sm:    0.6875rem;
+  --fs-mono-sm:     0.75rem;
+
+  /* Weights */
+  --fw-light: 300;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* Tracking */
+  --tracking-tighter: -0.02em;
+  --tracking-tight:   -0.01em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.08em;
+  --tracking-wider:   0.16em;
+  --tracking-widest:  0.2em;
+
+  /* Leading */
+  --leading-none: 1;
+  --leading-display: 1.04;
+  --leading-snug: 1.15;
+  --leading-normal: 1.45;
+  --leading-relaxed: 1.6;
+
+  /* ---- Space, radius, shadow, motion ------------------------------ */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Tap target floor for mobile */
+  --tap-min: 44px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-xl: 22px;
+  --radius-pill: 999px;
+
+  /* Shadows — deep, soft, gallery-dim. Plus a porcelain inner glaze edge. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 24px -8px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 24px 60px -16px rgba(0, 0, 0, 0.72);
+  --shadow-glaze: inset 0 1px 0 rgba(246, 241, 233, 0.10);
+  --glow-crimson: 0 0 0 1px rgba(192, 58, 74, 0.30), 0 8px 28px -6px rgba(161, 29, 44, 0.45);
+  --glow-spot: 0 0 120px 40px rgba(246, 241, 233, 0.05);
+
+  /* Motion — restrained, slightly slow, gallery-calm */
+  --ease-standard: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-emphasis: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 160ms;
+  --dur-base: 260ms;
+  --dur-slow: 520ms;
+  --dur-veil: 900ms;
+
+  /* Layout */
+  --frame-max: 430px;       /* mobile app frame width */
+  --content-max: 1100px;    /* marketing/wide max */
+
+  color-scheme: dark;
+}
+
+/* ---- Optional grain / glaze utility overlays ----------------------- */
+/* Subtle film grain to break up flat dark fields — apply to a fixed overlay layer. */
+.tex-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
