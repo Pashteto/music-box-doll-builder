@@ -1,6 +1,21 @@
 import type { Metadata, Viewport } from 'next'
+import { Fraunces, Mulish } from 'next/font/google'
 import './globals.css'
 import { APP_NAME } from '@/lib/hello'
+import { SessionInit } from '@/modules/auth/SessionInit'
+
+// Display serif (echoes the artist's exhibition-poster type) + warm humanist body.
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-fraunces',
+  display: 'swap',
+  style: ['normal', 'italic'],
+})
+const mulish = Mulish({
+  subsets: ['latin'],
+  variable: '--font-mulish',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://lindentar.pashteto.com'),
@@ -27,7 +42,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: 'cover',
-  themeColor: '#6366f1',
+  themeColor: '#a11d2c',
 }
 
 export default function RootLayout({
@@ -36,8 +51,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="flex min-h-full flex-col">{children}</body>
+    <html lang="en" className={`${fraunces.variable} ${mulish.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col">
+        <SessionInit />
+        {children}
+      </body>
     </html>
   )
 }

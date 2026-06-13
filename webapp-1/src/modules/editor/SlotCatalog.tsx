@@ -35,13 +35,13 @@ export function SlotCatalog({ slotType, manifest }: SlotCatalogProps) {
       <button
         type="button"
         onClick={() => clearSlot(slotType)}
-        className={`flex h-24 w-24 shrink-0 snap-center flex-col items-center justify-center rounded-xl border-2 text-xs ${
+        className={`flex h-24 w-24 shrink-0 snap-center flex-col items-center justify-center gap-1 rounded-lg border bg-surface-overlay text-xs uppercase tracking-wide shadow-[inset_0_1px_0_rgba(246,241,233,0.1)] transition-colors ${
           selectedAssetId === null
-            ? 'border-brand-primary bg-brand-primary/10'
-            : 'border-black/10 bg-black/5'
+            ? 'border-brand-accent text-text-secondary shadow-[0_0_0_1px_var(--color-brand-accent),inset_0_1px_0_rgba(246,241,233,0.1)]'
+            : 'border-border text-text-muted hover:border-border-glaze'
         }`}
       >
-        <span className="text-2xl">∅</span>
+        <span className="text-2xl text-text-faint">∅</span>
         Empty
       </button>
 
@@ -52,8 +52,10 @@ export function SlotCatalog({ slotType, manifest }: SlotCatalogProps) {
             key={asset.assetId}
             type="button"
             onClick={() => selectAsset(slotType, asset.assetId, asset.defaultTransform)}
-            className={`relative flex h-24 w-24 shrink-0 snap-center flex-col items-center justify-end overflow-hidden rounded-xl border-2 ${
-              active ? 'border-brand-primary' : 'border-black/10'
+            className={`relative flex h-24 w-24 shrink-0 snap-center flex-col items-center justify-end overflow-hidden rounded-lg border bg-surface-overlay shadow-[inset_0_1px_0_rgba(246,241,233,0.1)] transition-colors ${
+              active
+                ? 'border-brand-accent shadow-[0_0_0_1px_var(--color-brand-accent),inset_0_1px_0_rgba(246,241,233,0.1)]'
+                : 'border-border hover:border-border-glaze'
             }`}
           >
             <img
@@ -61,12 +63,14 @@ export function SlotCatalog({ slotType, manifest }: SlotCatalogProps) {
               alt={asset.displayName}
               className="absolute inset-0 h-full w-full object-cover"
             />
-            <span className="relative z-10 w-full truncate bg-black/45 px-1 py-0.5 text-[10px] text-white">
+            <span className="relative z-10 w-full truncate bg-gradient-to-t from-ink/85 to-transparent px-1.5 pb-1 pt-2 text-[10px] uppercase tracking-wide text-text-secondary">
               {asset.displayName}
-              <span className="ml-1 opacity-70">{formatSize(asset.fileSizeBytes)}</span>
+              <span className="ml-1 font-mono lowercase tracking-normal text-text-faint">
+                {formatSize(asset.fileSizeBytes)}
+              </span>
             </span>
             {active ? (
-              <span className="absolute right-1 top-1 z-10 rounded-full bg-brand-primary px-1 text-[10px] text-white">
+              <span className="absolute right-1.5 top-1.5 z-10 grid h-[18px] w-[18px] place-items-center rounded-full bg-brand-accent text-[11px] font-bold text-ink">
                 ✓
               </span>
             ) : null}

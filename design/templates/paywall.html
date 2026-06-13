@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>linden_tar — unlock more films</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Mulish:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../tokens/tokens.css" />
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:var(--font-body); color:var(--color-text); -webkit-font-smoothing:antialiased;
+    min-height:100vh; display:grid; place-items:center; padding:24px;
+    background:var(--color-bg-base);
+    background-image: radial-gradient(80% 50% at 50% 0%, rgba(201,116,60,0.05), transparent 55%);
+  }
+  /* the dimmed editor behind the modal (context) */
+  .frame {
+    position:relative; width:100%; max-width:var(--frame-max); min-height:840px;
+    border-radius:30px; overflow:hidden; isolation:isolate;
+    background:linear-gradient(180deg,var(--ink-900),var(--ink-950));
+    border:1px solid var(--color-border); box-shadow:var(--shadow-lg);
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:18px; padding-top:60px;
+  }
+  .bg-doll { width:120px; height:170px; position:relative; filter:drop-shadow(0 20px 24px rgba(0,0,0,.6)); opacity:.5; }
+  .bg-doll .hd { position:absolute; left:50%; top:0; transform:translateX(-50%); width:92px; height:112px; border-radius:46px 46px 42px 42px;
+    background:linear-gradient(160deg,var(--porcelain-100),#b7a78f); }
+  .bg-doll .ck { position:absolute; left:50%; bottom:0; transform:translateX(-50%); width:118px; height:74px; border-radius:60px 60px 16px 16px;
+    background:linear-gradient(165deg,var(--crimson-500),var(--crimson-700)); }
+  .bg-line { font-family:var(--font-display); font-style:italic; color:var(--color-text-faint); font-size:var(--fs-serif-italic); opacity:.5; }
+
+  /* scrim */
+  .scrim { position:absolute; inset:0; z-index:5; background:var(--color-scrim);
+    backdrop-filter:blur(3px); display:grid; place-items:end center; padding:0 0 0; animation:fade var(--dur-base) var(--ease-standard); }
+  @keyframes fade { from{opacity:0} to{opacity:1} }
+
+  /* ---- the modal / sheet ---- */
+  .sheet {
+    position:relative; width:100%;
+    background:linear-gradient(180deg, var(--color-surface), var(--ink-900));
+    border-top:1px solid var(--color-border-glaze);
+    border-top-left-radius:var(--radius-xl); border-top-right-radius:var(--radius-xl);
+    box-shadow:0 -28px 60px -20px #000; padding:18px 22px calc(24px + env(safe-area-inset-bottom));
+    overflow:hidden; isolation:isolate;
+    animation:rise var(--dur-slow) var(--ease-emphasis); transform-origin:bottom;
+  }
+  @keyframes rise { from{transform:translateY(40px); opacity:0} to{transform:none; opacity:1} }
+  .sheet::after { content:""; position:absolute; inset:0; pointer-events:none; opacity:.04; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  /* soft crimson glow at top edge */
+  .sheet::before { content:""; position:absolute; top:-30px; left:50%; transform:translateX(-50%);
+    width:60%; height:60px; background:radial-gradient(50% 100% at 50% 100%, rgba(161,29,44,.35), transparent 70%); filter:blur(6px); }
+
+  .grab { width:42px; height:4px; border-radius:var(--radius-pill); background:var(--ink-600); margin:0 auto 18px; }
+
+  .eyebrow { text-align:center; font-size:var(--fs-label); letter-spacing:var(--tracking-wider);
+    text-transform:uppercase; color:var(--color-accent-ember); font-weight:var(--fw-semibold); }
+  .sheet h2 { font-family:var(--font-display); font-weight:400; font-size:var(--fs-display-xl);
+    line-height:var(--leading-snug); letter-spacing:var(--tracking-tight); color:var(--color-text-heading);
+    text-align:center; margin:10px 0 8px; }
+  .sheet h2 em { font-style:italic; }
+  .sub { text-align:center; color:var(--color-text-secondary); font-size:var(--fs-body-md);
+    line-height:var(--leading-relaxed); max-width:32ch; margin:0 auto 20px; }
+
+  /* film thumbnail strip — what they made */
+  .filmstrip { display:flex; gap:7px; justify-content:center; margin-bottom:22px; }
+  .filmstrip .cell { width:46px; height:74px; border-radius:6px; border:1px solid var(--color-border);
+    background:radial-gradient(70% 50% at 50% 30%, rgba(246,241,233,.08), transparent), linear-gradient(180deg,#1a1612,#0e0c0a);
+    position:relative; box-shadow:var(--shadow-glaze); }
+  .filmstrip .cell::before { content:""; position:absolute; left:50%; top:14px; transform:translateX(-50%);
+    width:18px; height:22px; border-radius:50% 50% 46% 46%; background:linear-gradient(160deg,var(--porcelain-100),#b7a78f); }
+  .filmstrip .cell::after { content:""; position:absolute; left:50%; bottom:8px; transform:translateX(-50%);
+    width:24px; height:18px; border-radius:14px 14px 4px 4px; background:linear-gradient(160deg,var(--crimson-500),var(--crimson-700)); }
+  .filmstrip .cell.locked { filter:grayscale(.5) brightness(.55); }
+
+  /* price card */
+  .offer {
+    border:1px solid var(--color-border); border-radius:var(--radius-lg);
+    background:var(--color-surface-overlay); box-shadow:var(--shadow-glaze);
+    padding:16px 18px; margin-bottom:16px; position:relative; overflow:hidden;
+  }
+  .offer .row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+  .offer .ttl { font-family:var(--font-display); font-size:var(--fs-display-md); color:var(--color-text-heading); }
+  .offer .price { font-family:var(--font-mono); font-size:1.5rem; color:var(--color-text); }
+  .offer .price small { display:block; text-align:right; font-size:var(--fs-body-sm); color:var(--color-text-faint); font-family:var(--font-body); }
+  .offer ul { list-style:none; margin:14px 0 0; padding:0; display:grid; gap:9px; }
+  .offer li { display:flex; align-items:center; gap:10px; color:var(--color-text-secondary); font-size:var(--fs-body-sm); }
+  .offer li::before { content:""; width:16px; height:16px; flex:0 0 auto; border-radius:50%;
+    background:var(--color-accent-verdigris-subtle); border:1px solid var(--color-accent-verdigris);
+    box-shadow:inset 0 0 0 3px var(--ink-800); }
+  .offer .tag { position:absolute; top:0; right:0; font-size:var(--fs-label-sm); letter-spacing:var(--tracking-wider);
+    text-transform:uppercase; color:var(--ink-950); background:var(--color-accent-ember); padding:4px 10px; border-bottom-left-radius:var(--radius-md); font-weight:700; }
+
+  .btn { appearance:none; border:none; cursor:pointer; font-family:var(--font-body); width:100%;
+    min-height:var(--tap-min); border-radius:var(--radius-pill); font-weight:var(--fw-semibold); font-size:var(--fs-body-md);
+    transition:transform var(--dur-fast), background var(--dur-base); display:inline-flex; align-items:center; justify-content:center; gap:9px; }
+  .btn:active{ transform:translateY(1px) scale(.99); }
+  .btn-primary { background:linear-gradient(180deg,var(--crimson-500),var(--crimson-600)); color:var(--color-text-on-crimson);
+    box-shadow:var(--glow-crimson), var(--shadow-glaze); }
+  .btn-primary:hover{ background:linear-gradient(180deg,var(--crimson-400),var(--crimson-500)); }
+  .btn-text { background:transparent; color:var(--color-text-muted); margin-top:6px; font-weight:var(--fw-medium); }
+  .btn-text:hover{ color:var(--color-text-secondary); }
+
+  .legal { text-align:center; color:var(--color-text-faint); font-size:var(--fs-body-sm); margin-top:14px; line-height:1.5; }
+  .legal a { color:var(--color-link); text-decoration:none; }
+  .secure { display:flex; align-items:center; justify-content:center; gap:7px; color:var(--color-text-faint);
+    font-size:var(--fs-body-sm); margin-top:10px; }
+  .secure .lock { width:13px; height:13px; border:1.4px solid currentColor; border-radius:3px; position:relative; }
+  .secure .lock::before { content:""; position:absolute; top:-5px; left:50%; transform:translateX(-50%); width:7px; height:7px;
+    border:1.4px solid currentColor; border-bottom:none; border-radius:5px 5px 0 0; }
+
+  .close { position:absolute; top:14px; right:16px; z-index:7; width:var(--tap-min); height:var(--tap-min);
+    border-radius:var(--radius-pill); border:1px solid var(--color-border); background:rgba(27,24,20,.7);
+    color:var(--color-text-secondary); cursor:pointer; font-size:18px; display:grid; place-items:center; }
+</style>
+</head>
+<body>
+  <main class="frame" aria-hidden="true">
+    <!-- dimmed editor context behind -->
+    <div class="bg-doll"><div class="hd"></div><div class="ck"></div></div>
+    <p class="bg-line">she is finished. she would like to be seen.</p>
+
+    <button class="close" aria-label="Close">×</button>
+
+    <div class="scrim">
+      <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="pw-title">
+        <div class="grab"></div>
+        <p class="eyebrow">your first film is spent</p>
+        <h2 id="pw-title">Let the others <em>out of the box</em></h2>
+        <p class="sub">You've exported your first doll. Unlock unlimited films, every locked face, and the full glaze catalog.</p>
+
+        <div class="filmstrip" aria-hidden="true">
+          <div class="cell"></div>
+          <div class="cell locked"></div>
+          <div class="cell locked"></div>
+          <div class="cell locked"></div>
+        </div>
+
+        <div class="offer">
+          <span class="tag">one-time</span>
+          <div class="row">
+            <div>
+              <div class="ttl">The Full Vitrine</div>
+            </div>
+            <div class="price">$6.99<small>pay once</small></div>
+          </div>
+          <ul>
+            <li>Unlimited video exports</li>
+            <li>All locked faces, glazes &amp; cloaks</li>
+            <li>No watermark on your films</li>
+          </ul>
+        </div>
+
+        <button class="btn btn-primary">Unlock the vitrine — $6.99</button>
+        <button class="btn btn-text">Restore a previous purchase</button>
+
+        <div class="secure"><span class="lock"></span> Secure checkout via Stripe</div>
+        <p class="legal">One-time purchase, no subscription. By continuing you agree to the <a href="#">terms</a>.</p>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
