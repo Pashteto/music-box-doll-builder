@@ -51,5 +51,6 @@ describe('sessionSlice', () => {
     vi.mocked(authApi.me).mockRejectedValue(new Error('401'))
     await useAppStore.getState().fetchMe()
     expect(useAppStore.getState().user).toBeNull()
+    expect(useAppStore.getState().sessionLoading).toBe(false)
   })
 })
