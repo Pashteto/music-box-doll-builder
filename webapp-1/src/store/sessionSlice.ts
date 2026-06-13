@@ -25,7 +25,13 @@ export const createSessionSlice: StateCreator<AppState, [], [], SessionSlice> = 
     set({ user })
   },
   logout: async () => {
-    await authApi.logout()
+    // Best-effort: clear locally even if the server call fails (cookie session may
+    // already be gone) so the logout button never appears to do nothing.
+    try {
+      await authApi.logout()
+    } catch {
+      /* ignore network/5xx — clear local session regardless */
+    }
     set({ user: null })
   },
   fetchMe: async () => {

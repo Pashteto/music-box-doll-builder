@@ -9,5 +9,6 @@ export function useSession() {
   const login = useAppStore((s) => s.login)
   const signup = useAppStore((s) => s.signup)
   const logout = useAppStore((s) => s.logout)
-  return { user, sessionLoading, login, signup, logout }
+  const fetchMe = useAppStore((s) => s.fetchMe)
+  return { user, sessionLoading, login, signup, logout, fetchMe }
 }
