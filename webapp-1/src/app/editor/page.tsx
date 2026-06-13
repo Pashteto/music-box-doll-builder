@@ -31,7 +31,7 @@ function PrimaryButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="rounded-xl bg-brand-primary px-5 py-2.5 font-medium text-white active:scale-95 disabled:opacity-40"
+      className="min-h-11 rounded-full bg-brand-primary px-5 py-2.5 font-semibold text-foreground shadow-[0_0_0_1px_rgba(192,58,74,0.30),0_8px_28px_-6px_rgba(161,29,44,0.45),inset_0_1px_0_rgba(246,241,233,0.1)] transition-colors hover:bg-brand-primary-hover active:translate-y-px active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-surface-overlay disabled:text-text-faint disabled:shadow-none"
     >
       {children}
     </button>
@@ -43,7 +43,7 @@ function GhostButton({ children, onClick }: { children: React.ReactNode; onClick
     <button
       type="button"
       onClick={onClick}
-      className="rounded-xl px-4 py-2.5 font-medium text-foreground/70 active:scale-95"
+      className="min-h-11 rounded-full border border-border px-4 py-2.5 font-semibold text-text-secondary shadow-[inset_0_1px_0_rgba(246,241,233,0.1)] transition-colors hover:border-border-glaze hover:text-foreground active:translate-y-px active:scale-[0.99]"
     >
       {children}
     </button>
@@ -93,7 +93,7 @@ export default function EditorPage() {
       {editorMode !== 'render' ? (
         <div className="relative min-h-0 flex-1">
           <div className="absolute inset-0 flex items-center justify-center p-3">
-            <DollScene className="aspect-[9/16] h-full max-w-full overflow-hidden rounded-2xl bg-[#1a1424]">
+            <DollScene className="aspect-[9/16] h-full max-w-full overflow-hidden rounded-2xl border border-border bg-background-subtle shadow-[inset_0_1px_0_rgba(246,241,233,0.12),inset_0_-36px_70px_-36px_rgba(0,0,0,0.9)]">
               <DollComposition
                 manifest={manifest}
                 selectedSlot={inSlotEditor ? currentSlot : null}
@@ -105,22 +105,22 @@ export default function EditorPage() {
       ) : null}
 
       {/* Bottom control panel */}
-      <section className="flex flex-col gap-3 rounded-t-3xl bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-8px_24px_rgba(0,0,0,0.08)]">
+      <section className="flex flex-col gap-3 rounded-t-3xl border-t border-border-glaze bg-gradient-to-b from-surface to-background p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-20px_40px_-28px_#000]">
         {isLoading ? (
           <p className="text-center text-sm text-foreground/60">Loading catalog…</p>
         ) : null}
         {error ? (
-          <p className="text-center text-sm text-red-600">
-            Catalog failed to load: {error.message}
-          </p>
+          <p className="text-center text-sm text-danger">Catalog failed to load: {error.message}</p>
         ) : null}
 
         {/* Slot editor */}
         {inSlotEditor && !isLoading ? (
           <>
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">{SLOT_LABELS[currentSlot]}</h2>
-              <span className="text-xs text-foreground/50">
+            <div className="flex items-baseline justify-between">
+              <h2 className="font-display text-2xl font-medium text-text-heading">
+                {SLOT_LABELS[currentSlot]}
+              </h2>
+              <span className="font-mono text-xs uppercase tracking-wide text-brand-secondary">
                 {currentStep + 1} / {PHASE1_SLOTS.length}
               </span>
             </div>
@@ -128,7 +128,7 @@ export default function EditorPage() {
             {currentEntry ? (
               <TransformControls slotType={currentSlot} entry={currentEntry} mode="slot" />
             ) : (
-              <p className="text-xs text-foreground/50">Pick an item to place it on your doll.</p>
+              <p className="text-xs text-text-muted">Pick an item to place it on your doll.</p>
             )}
             <ProgressDots total={PHASE1_SLOTS.length} current={currentStep} onJump={goToSlot} />
             <div className="flex items-center justify-between">
@@ -147,8 +147,10 @@ export default function EditorPage() {
         {/* Completion / review */}
         {editorMode === 'slot-editor' && isReviewMode ? (
           <>
-            <h2 className="text-center text-lg font-semibold">Your doll is ready ✨</h2>
-            <p className="text-center text-xs text-foreground/60">
+            <h2 className="text-center font-display text-2xl font-medium text-text-heading">
+              Your doll is ready
+            </h2>
+            <p className="text-center text-xs text-text-secondary">
               Drag to rotate. Continue to decorate the scene.
             </p>
             <div className="flex items-center justify-between">
@@ -168,7 +170,9 @@ export default function EditorPage() {
         {/* Scene composer */}
         {editorMode === 'scene' ? (
           <>
-            <h2 className="text-lg font-semibold">Decorate the scene</h2>
+            <h2 className="font-display text-2xl font-medium text-text-heading">
+              Decorate the scene
+            </h2>
             <SceneComposer manifest={manifest} />
             <div className="flex items-center justify-between">
               <GhostButton
@@ -187,7 +191,7 @@ export default function EditorPage() {
         {/* Music selection */}
         {editorMode === 'music' ? (
           <>
-            <h2 className="text-lg font-semibold">Pick your music</h2>
+            <h2 className="font-display text-2xl font-medium text-text-heading">Pick your music</h2>
             <MusicSelection manifest={manifest} onRender={() => setEditorMode('render')} />
             <GhostButton onClick={() => setEditorMode('scene')}>← Back to scene</GhostButton>
           </>
@@ -196,7 +200,7 @@ export default function EditorPage() {
         {/* Render + share */}
         {editorMode === 'render' || editorMode === 'share' ? (
           <>
-            <h2 className="text-lg font-semibold">Your video</h2>
+            <h2 className="font-display text-2xl font-medium text-text-heading">Your video</h2>
             <RenderScreen manifest={manifest} onBack={() => setEditorMode('music')} />
           </>
         ) : null}

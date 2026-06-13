@@ -16,8 +16,12 @@ export function ProgressDots({ total, current, onJump }: ProgressDotsProps) {
           type="button"
           aria-label={`Go to step ${i + 1}`}
           onClick={() => onJump?.(i)}
-          className={`h-1.5 rounded-full transition-all ${
-            i === current ? 'w-6 bg-brand-primary' : 'w-2.5 bg-black/20'
+          className={`h-1.5 rounded-full transition-all duration-300 ${
+            i === current
+              ? 'w-6 bg-brand-primary shadow-[0_0_0_4px_rgba(161,29,44,0.16)]'
+              : i < current
+                ? 'w-1.5 bg-clay'
+                : 'w-1.5 bg-surface-overlay'
           }`}
         />
       ))}
