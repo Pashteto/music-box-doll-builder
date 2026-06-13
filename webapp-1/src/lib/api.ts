@@ -96,3 +96,14 @@ export const projectsApi = {
     }),
   remove: (id: string) => apiFetch<null>(`/api/v1/projects/${id}`, { method: 'DELETE' }),
 }
+
+// Plan 3 contract (backend NOT deployed yet) — documented in the parent design.
+export interface Entitlement {
+  entitled: boolean
+}
+
+export const entitlementsApi = {
+  get: () => apiFetch<Entitlement>('/api/v1/entitlements'),
+  mockCheckout: () =>
+    apiFetch<Entitlement>('/api/v1/entitlements/mock-checkout', { method: 'POST' }),
+}

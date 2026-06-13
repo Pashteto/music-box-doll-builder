@@ -1,9 +1,9 @@
 import type { StateCreator } from 'zustand'
 import type { AppState } from '@/store/types'
+import { entitlementsApi } from '@/lib/api'
 
-// Entitlement state. In the lean MVP this is a STUB: the first export is always
-// free and no Stripe/backend is wired (see Milestone 4 / E12-T7). The async
-// checkEntitlement is kept as the seam where the real entitlements API plugs in.
+// Entitlement state. `entitled` now comes from the backend (Plan 3 contract).
+// First-export-free remains a client-side localStorage gate (see useEntitlement).
 export interface EntitlementSlice {
   entitled: boolean
   firstExportUsed: boolean
@@ -12,7 +12,10 @@ export interface EntitlementSlice {
   setEntitled: (entitled: boolean) => void
   markFirstExportUsed: () => void
   setFirstExportUsed: (used: boolean) => void
-  checkEntitlement: (sessionId: string) => Promise<boolean>
+  /** Fetch entitlement for the current session; returns the (new) entitled value. */
+  checkEntitlement: () => Promise<boolean>
+  /** Mocked checkout — grants entitlement server-side (no Stripe). */
+  mockCheckout: () => Promise<boolean>
 }
 
 export const createEntitlementSlice: StateCreator<AppState, [], [], EntitlementSlice> = (
@@ -27,8 +30,23 @@ export const createEntitlementSlice: StateCreator<AppState, [], [], EntitlementS
   markFirstExportUsed: () => set({ firstExportUsed: true }),
   setFirstExportUsed: (used) => set({ firstExportUsed: used }),
 
-  // STUB: no network. Real impl (Milestone 4+) calls GET /api/v1/entitlements/{id}.
   checkEntitlement: async () => {
-    return get().entitled
+    set({ entitlementLoading: true })
+    try {
+      const { entitled } = await entitlementsApi.get()
+      set({ entitled })
+      return entitled
+    } catch {
+      // Network/Plan-3-not-deployed: keep current value (client first-free gate still applies).
+      return get().entitled
+    } finally {
+      set({ entitlementLoading: false })
+    }
+  },
+
+  mockCheckout: async () => {
+    const { entitled } = await entitlementsApi.mockCheckout()
+    set({ entitled })
+    return entitled
   },
 })
