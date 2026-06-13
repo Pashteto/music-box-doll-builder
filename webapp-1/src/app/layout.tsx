@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Fraunces, Mulish } from 'next/font/google'
 import './globals.css'
 import { APP_NAME } from '@/lib/hello'
+import { SessionInit } from '@/modules/auth/SessionInit'
 
 // Display serif (echoes the artist's exhibition-poster type) + warm humanist body.
 const fraunces = Fraunces({
@@ -51,7 +52,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${fraunces.variable} ${mulish.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <SessionInit />
+        {children}
+      </body>
     </html>
   )
 }
