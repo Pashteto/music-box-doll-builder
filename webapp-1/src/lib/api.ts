@@ -70,3 +70,29 @@ export const authApi = {
   // /auth/me returns a BARE User (not wrapped in { user }).
   me: () => apiFetch<ApiUser>('/api/v1/auth/me'),
 }
+
+export interface ServerProject {
+  uuid: string
+  name: string
+  data: Record<string, unknown>
+  thumbnail?: string
+  updated_at: string // RFC3339
+  created_at: string
+}
+
+export interface ProjectInput {
+  name: string
+  data: Record<string, unknown>
+  thumbnail?: string
+  updated_at: string // RFC3339 — drives last-write-wins
+}
+
+export const projectsApi = {
+  list: () => apiFetch<ServerProject[]>('/api/v1/projects'),
+  upsert: (id: string, input: ProjectInput) =>
+    apiFetch<ServerProject>(`/api/v1/projects/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(input),
+    }),
+  remove: (id: string) => apiFetch<null>(`/api/v1/projects/${id}`, { method: 'DELETE' }),
+}
