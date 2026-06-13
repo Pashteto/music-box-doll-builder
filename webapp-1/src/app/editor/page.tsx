@@ -14,6 +14,7 @@ import { SceneComposer } from '@/modules/scene-composer/SceneComposer'
 import { MusicSelection } from '@/modules/music/MusicSelection'
 import { RenderScreen } from '@/modules/render/RenderScreen'
 import { useEntitlementInit } from '@/modules/paywall/useEntitlement'
+import { AuthAffordance } from '@/modules/auth/AuthAffordance'
 import { PHASE1_SLOTS, SLOT_LABELS } from '@/modules/editor/slots'
 
 function PrimaryButton({
@@ -83,6 +84,9 @@ export default function EditorPage() {
 
   return (
     <main className="flex min-h-dvh flex-col bg-background">
+      <header className="flex items-center justify-end px-4 py-2">
+        <AuthAffordance />
+      </header>
       {/* 3D stage (hidden during render — RenderScreen owns its own offscreen canvas).
           absolute inset-0 gives the canvas a definite height; aspect-[9/16] keeps the
           portrait product framing and centers it on wide screens. */}
