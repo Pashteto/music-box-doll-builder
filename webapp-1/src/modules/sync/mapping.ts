@@ -10,7 +10,9 @@ import type { ServerProject, ProjectInput } from '@/lib/api'
 export function toProjectInput(p: DollProject): ProjectInput {
   return {
     name: p.name,
-    data: p as unknown as Record<string, unknown>,
+    // Thumbnail travels as the dedicated top-level field, not inside `data`, to
+    // avoid sending the (large) data-URL twice per upsert.
+    data: { ...p, thumbnailDataUrl: undefined } as unknown as Record<string, unknown>,
     thumbnail: p.thumbnailDataUrl ?? undefined,
     updated_at: new Date(p.updatedAt).toISOString(),
   }

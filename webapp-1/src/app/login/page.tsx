@@ -46,7 +46,13 @@ function LoginInner() {
 
 export default function LoginPage() {
   return (
-    <Suspense>
+    <Suspense
+      fallback={
+        <main className="flex min-h-full items-center justify-center">
+          <span className="text-foreground/50">Loading…</span>
+        </main>
+      }
+    >
       <LoginInner />
     </Suspense>
   )

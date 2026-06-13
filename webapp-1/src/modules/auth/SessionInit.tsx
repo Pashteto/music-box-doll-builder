@@ -15,7 +15,13 @@ export function SessionInit() {
   }, [fetchMe])
 
   useEffect(() => {
-    if (user && !synced.current) {
+    // Reset the guard on logout so a subsequent login re-syncs (adopts any
+    // drafts made while logged out).
+    if (!user) {
+      synced.current = false
+      return
+    }
+    if (!synced.current) {
       synced.current = true
       void syncOnLogin()
     }
