@@ -46,7 +46,7 @@ export function AuthForm({ mode, onSubmit, error, pending }: AuthFormProps) {
         />
       </label>
       {error ? (
-        <p role="alert" className="text-sm text-brand-primary">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       ) : null}

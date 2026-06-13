@@ -1,6 +1,7 @@
 'use client'
 
 import { Suspense, useState } from 'react'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { AuthForm } from '@/modules/auth/AuthForm'
 import { useSession } from '@/modules/auth/useSession'
@@ -36,9 +37,9 @@ function LoginInner() {
   return (
     <main className="flex min-h-full flex-col items-center justify-center gap-6 p-6">
       <AuthForm mode="login" onSubmit={onSubmit} error={error} pending={pending} />
-      <a href={signupHref} className="text-sm text-foreground/70 underline">
+      <Link href={signupHref} className="text-sm text-foreground/70 underline">
         Create an account
-      </a>
+      </Link>
     </main>
   )
 }
