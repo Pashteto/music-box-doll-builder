@@ -8,8 +8,8 @@ import (
 	"github.com/gofrs/uuid"
 
 	"dollbuilder/internal/auth"
-	domain "dollbuilder/internal/models"
 	authops "dollbuilder/internal/http/server/operations/auth"
+	domain "dollbuilder/internal/models"
 )
 
 func TestGetMeUnauthenticated(t *testing.T) {

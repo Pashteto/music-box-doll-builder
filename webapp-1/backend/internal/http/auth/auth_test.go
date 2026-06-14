@@ -60,6 +60,12 @@ func (m *mockService) UpsertProject(userID uuid.UUID, p *models.Project) (*model
 func (m *mockService) DeleteProject(userID, id uuid.UUID) error {
 	return nil
 }
+func (m *mockService) Entitlement(userID uuid.UUID) (bool, string, error) { return false, "", nil }
+func (m *mockService) GrantMock(userID uuid.UUID) error                   { return nil }
+func (m *mockService) GrantFromStripe(_, _, _, _ string) error            { return nil }
+func (m *mockService) CheckoutSession(userID uuid.UUID, email string) (string, error) {
+	return "", nil
+}
 
 func TestNewAuth(t *testing.T) {
 	tests := []struct {

@@ -45,6 +45,19 @@ type IService interface {
 
 	// DeleteProject removes a project owned by userID.
 	DeleteProject(userID, id uuid.UUID) error
+
+	// Entitlement returns the export entitlement state for userID.
+	Entitlement(userID uuid.UUID) (entitled bool, source string, err error)
+
+	// GrantMock marks userID entitled via the mock path (test/dev only).
+	GrantMock(userID uuid.UUID) error
+
+	// GrantFromStripe upserts an active entitlement from a verified Stripe webhook.
+	// userID is the Stripe client_reference_id (a user UUID string).
+	GrantFromStripe(userID, customerID, paymentIntentID, productID string) error
+
+	// CheckoutSession creates a Stripe Checkout session for userID and returns its URL.
+	CheckoutSession(userID uuid.UUID, email string) (string, error)
 }
 
 // Service implements IService interface.
@@ -54,7 +67,19 @@ type Service struct {
 	// cache is the optional Redis session cache. Nil when cache is disabled.
 	// All cache accesses are guarded by nil checks so the service works without it.
 	cache sessionCache
+
+	// stripe is the optional Stripe client. Nil/disabled => checkout returns ErrNotConfigured.
+	stripe stripeCheckouter
 }
+
+// stripeCheckouter is the optional Stripe dependency; nil-safe.
+type stripeCheckouter interface {
+	Enabled() bool
+	CreateCheckoutSession(userID, email string) (string, error)
+}
+
+// SetStripe attaches an optional Stripe client (nil-safe), mirroring SetCache.
+func (s *Service) SetStripe(c stripeCheckouter) { s.stripe = c }
 
 // NewService creates a new service instance.
 // Dependencies:

@@ -37,6 +37,12 @@ func (m *moduleMockRepository) ListProjects(userID uuid.UUID) ([]*models.Project
 	return nil, nil
 }
 func (m *moduleMockRepository) DeleteProject(userID, id uuid.UUID) error { return nil }
+func (m *moduleMockRepository) EntitlementByUserID(_ uuid.UUID) (*models.Entitlement, error) {
+	return nil, nil
+}
+func (m *moduleMockRepository) UpsertEntitlement(e *models.Entitlement) (*models.Entitlement, error) {
+	return e, nil
+}
 
 // mockRepositoryProvider wraps a repository for testing.
 type mockRepositoryProvider struct {

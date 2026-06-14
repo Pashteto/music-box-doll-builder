@@ -24,6 +24,9 @@ type mockService struct {
 	getProjectFunc     func(userID, id uuid.UUID) (*domainmodels.Project, error)
 	upsertProjectFunc  func(userID uuid.UUID, p *domainmodels.Project) (*domainmodels.Project, error)
 	deleteProjectFunc  func(userID, id uuid.UUID) error
+	entitlementFunc    func(userID uuid.UUID) (bool, string, error)
+	grantMockFunc      func(userID uuid.UUID) error
+	checkoutFunc       func(userID uuid.UUID, email string) (string, error)
 }
 
 func (m *mockService) GetUserByEmail(ctx context.Context, email string) (*domainmodels.User, error) {
@@ -82,6 +85,31 @@ func (m *mockService) DeleteProject(userID, id uuid.UUID) error {
 		return m.deleteProjectFunc(userID, id)
 	}
 	return nil
+}
+
+func (m *mockService) Entitlement(userID uuid.UUID) (bool, string, error) {
+	if m.entitlementFunc != nil {
+		return m.entitlementFunc(userID)
+	}
+	return false, "", nil
+}
+
+func (m *mockService) GrantMock(userID uuid.UUID) error {
+	if m.grantMockFunc != nil {
+		return m.grantMockFunc(userID)
+	}
+	return nil
+}
+
+func (m *mockService) GrantFromStripe(userID, customerID, paymentIntentID, productID string) error {
+	return nil
+}
+
+func (m *mockService) CheckoutSession(userID uuid.UUID, email string) (string, error) {
+	if m.checkoutFunc != nil {
+		return m.checkoutFunc(userID, email)
+	}
+	return "", nil
 }
 
 func TestNewGetUserByEmail(t *testing.T) {
