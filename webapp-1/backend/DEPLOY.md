@@ -68,6 +68,35 @@ printf "DB_USER=dollbuilder\nDB_NAME=dollbuilder\nDB_PASSWORD=%s\n" "$(openssl r
 chmod 600 .env
 ```
 
+## Entitlements + Stripe (Plan 3 / E12) — deploy delta (NOT yet deployed as of 2026-06-14)
+
+The entitlements module + real Stripe Checkout (test-mode) are **merged to `main` and
+verified locally**, but **not yet on oracle-1**. To deploy:
+
+1. **Stripe TEST dashboard (manual, before deploy):**
+   - Create a product + a **one-time** Price → `price_...`
+   - Register a webhook endpoint `https://api.lindentar.pashteto.com/api/v1/webhooks/stripe`
+     for event `checkout.session.completed` → signing secret `whsec_...`
+   - Copy the test secret key `sk_test_...`
+2. **Add keys to the server `.env`** (NEVER commit; keys never go through chat/logs):
+   ```bash
+   ssh oracle-1
+   cd /home/ubuntu/dollbuilder
+   printf 'STRIPE_SECRET_KEY=sk_test_...\nSTRIPE_WEBHOOK_SECRET=whsec_...\nSTRIPE_PRICE_ID=price_...\n' >> .env
+   chmod 600 .env
+   ```
+   `docker-compose.prod.yml` passes these through and forces `ALLOW_MOCK_CHECKOUT=false`
+   in prod. Empty keys keep the app healthy (checkout → 503, webhook not wired).
+3. **Deploy** with the standard rsync + migrate + build procedure above. Migration
+   `000005_entitlements` creates the `entitlements` table.
+4. **Verify:** `GET /api/v1/entitlements` was **404**, must now return **401** without a
+   cookie (and `{"entitled":false}` with a valid session). Webhook with a bad/missing
+   `Stripe-Signature` must return **400**. Then drive a real test-mode purchase
+   (card `4242 4242 4242 4242`) and confirm the entitlement flips to active.
+
+> Audit note (ISO 27001): this introduces a payment/entitlement control — record it in
+> change management. Secrets live only in the server `.env` (chmod 600), never in git.
+
 ## Build notes
 
 - Base image `golang:1.26` (go.mod requires `go 1.26.1`).

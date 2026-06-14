@@ -15,6 +15,31 @@ This document breaks the Phase 1 prototype into implementation epics and tasks. 
 
 ---
 
+## Implementation Status (updated 2026-06-14)
+
+| Epic | State | Notes |
+|------|-------|-------|
+| E0 Scaffolding | ✅ done | Next.js 15 + Go monolith from template |
+| E2 Zustand store | ✅ done | composition/editor/entitlement slices |
+| E3 Catalog | ✅ done | static `public/catalog/manifest.json` |
+| E5 3D scene | ✅ done | DollScene/DollComposition |
+| E6 Slot editor | ✅ done | 5 slots + transform controls |
+| E9 Music | ✅ done | track list + Howler preview + duration slider + Render CTA |
+| E10 Video render | ✅ done + **verified 2026-06-14** | WebCodecs + MediaRecorder both produce valid MP4 in Chromium **and** WebKit (Safari engine). ⚠️ Real iOS Safari (esp. 16.x → MediaRecorder) still needs on-device confirmation — see manual checklist in the verification report. |
+| E11 Share | ✅ done | Web Share API + download fallback |
+| E12 Paywall + Stripe | ✅ **code complete (merged to main 2026-06-14), deploy pending** | Backend entitlements module (per-user, keyed to auth): `GET /entitlements`, `POST /entitlements/mock-checkout` (off in prod), `POST /checkout/session` (real Stripe test-mode), `POST /webhooks/stripe` (signature-verified, raw-body middleware). Frontend paywall now starts a REAL Stripe checkout (mock kept for dev) + re-checks entitlement on `/editor?checkout=success`. Migration `000005_entitlements`. **Not yet deployed to oracle-1** (needs Stripe test keys in `.env` + SSH). See `docs/superpowers/specs/2026-06-14-entitlements-stripe-design.md` + plan. |
+| E8 Scene composer | 🟡 partial | background works; foreground/floating-props/skip completeness still open |
+| E7 Global adjustment | ❌ not started | per-element constrained transforms post-editor |
+| E13 Analytics | ❌ not started | PostHog funnel (module dir empty) |
+| E14 PWA / SW | ❌ not started | no manifest/service worker yet |
+| E15 Backend catalog/sessions | ⏭️ **superseded** | catalog stays static; anonymous sessions replaced by email/password auth (PR #3) |
+| E16 Polish/perf | 🟡 ongoing | E16-T3/T4 device perf still needs a real iPhone |
+
+**Auth/sync note:** the original Phase-1 "guest-only, no accounts" constraint was replaced by
+real email/password auth + per-user project sync (PRs #3/#4) and per-user entitlements (E12).
+
+---
+
 ## E0: Project Scaffolding & Dev Infrastructure (P0)
 
 Bootstrap the codebase so all subsequent epics have a working dev environment.
@@ -595,6 +620,7 @@ Phase E -- Polish & Supporting:
 ## Risk Notes
 
 1. **E10 (Video Render) is the highest-risk epic.** WebCodecs on Safari is the #1 technical risk. Spike/prototype this early even if other epics aren't done. See spec "Risks to Plan For" and research doc "Video Export Strategy" section.
+   - **Update 2026-06-14 — verified (partially).** Driven via Playwright in both Chromium and **WebKit** (Apple's Safari engine): the full assemble→render→share flow produces a valid 1080×1920 H.264 MP4 with audio on **both** the WebCodecs (primary) and MediaRecorder (fallback) paths; rendered frames contain the doll (non-black). **Remaining risk:** desktop WebKit ≠ iOS Safari — iOS only shipped `VideoEncoder` in 17+, so iOS 16.x falls to MediaRecorder. On-device confirmation (esp. an iOS 16.x phone) is still owed; manual checklist captured at verification time.
 
 2. **3D performance on mobile Safari** -- WebGL memory limits are aggressive. E5-T4 and E16-T3 are critical quality gates. See research doc "Mobile Browser Gotchas".
 
