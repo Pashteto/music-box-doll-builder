@@ -50,6 +50,12 @@ type IRepository interface {
 	// DeleteProject removes a project owned by userID. Missing rows are not an error.
 	DeleteProject(userID, id uuid.UUID) error
 
+	// EntitlementByUserID returns the entitlement for userID, or (nil, nil) if none.
+	EntitlementByUserID(userID uuid.UUID) (*models.Entitlement, error)
+
+	// UpsertEntitlement inserts or updates (by user_uuid) the entitlement, returning the stored row.
+	UpsertEntitlement(e *models.Entitlement) (*models.Entitlement, error)
+
 	// TODO: Additional repository methods (uncomment and implement as needed):
 	//
 	// // GetOrCreateUser retrieves a user by getter or creates if not found.

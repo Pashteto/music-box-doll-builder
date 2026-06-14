@@ -99,6 +99,18 @@ type AuthConfig struct {
 	SessionTTL   time.Duration `mapstructure:"session_ttl"`   // e.g. 720h
 }
 
+// StripeConfig configures the Stripe Checkout integration. All values come from
+// the environment (never committed). An empty SecretKey disables checkout/webhook
+// (they return 503 / are rejected) so the service runs fine without Stripe.
+type StripeConfig struct {
+	SecretKey         string `mapstructure:"secret_key"`          // sk_test_... / sk_live_...
+	WebhookSecret     string `mapstructure:"webhook_secret"`      // whsec_...
+	PriceID           string `mapstructure:"price_id"`            // price_...
+	SuccessURL        string `mapstructure:"success_url"`         // post-payment redirect
+	CancelURL         string `mapstructure:"cancel_url"`          // cancel redirect
+	AllowMockCheckout bool   `mapstructure:"allow_mock_checkout"` // dev/test only; off in prod
+}
+
 // CacheConfig configures the Redis connection used for session caching and
 // login rate-limiting.
 type CacheConfig struct {
@@ -131,6 +143,9 @@ type Scheme struct {
 
 	// Auth configuration for session cookie settings.
 	Auth *AuthConfig `mapstructure:"auth"`
+
+	// Stripe configuration for the entitlements/checkout flow (optional; empty key disables it).
+	Stripe *StripeConfig `mapstructure:"stripe"`
 
 	// Env is the application environment (e.g. prod, dev, local).
 	Env string `mapstructure:"env"`

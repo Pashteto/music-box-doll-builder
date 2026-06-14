@@ -16,9 +16,9 @@ func (m *mockRepository) UserBy(_ *models.User, _ UserGetter) error { return nil
 func (m *mockRepository) CreateUserWithPassword(_ *models.User) error {
 	return nil
 }
-func (m *mockRepository) UserByEmail(_ string) (*models.User, error)     { return nil, nil }
-func (m *mockRepository) UserByUUID(_ uuid.UUID) (*models.User, error)   { return nil, nil }
-func (m *mockRepository) CreateSession(_ *models.Session) error          { return nil }
+func (m *mockRepository) UserByEmail(_ string) (*models.User, error)   { return nil, nil }
+func (m *mockRepository) UserByUUID(_ uuid.UUID) (*models.User, error) { return nil, nil }
+func (m *mockRepository) CreateSession(_ *models.Session) error        { return nil }
 func (m *mockRepository) SessionByTokenHash(_ string) (*models.Session, error) {
 	return nil, nil
 }

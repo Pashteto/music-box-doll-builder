@@ -105,4 +105,15 @@ func setDefaults() {
 	viper.SetDefault("auth.cookie_domain", "")
 	viper.SetDefault("auth.cookie_secure", false)
 	viper.SetDefault("auth.session_ttl", int64(720*60*60*1e9)) // 720h in nanoseconds
+
+	// Stripe / entitlements defaults. Secrets come from the environment
+	// (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ID, ...).
+	// Empty secret key => checkout/webhook disabled. Defaults must exist so
+	// viper.AutomaticEnv picks the env overrides up.
+	viper.SetDefault("stripe.secret_key", "")
+	viper.SetDefault("stripe.webhook_secret", "")
+	viper.SetDefault("stripe.price_id", "")
+	viper.SetDefault("stripe.success_url", "https://lindentar.pashteto.com/editor?checkout=success")
+	viper.SetDefault("stripe.cancel_url", "https://lindentar.pashteto.com/editor")
+	viper.SetDefault("stripe.allow_mock_checkout", true)
 }
