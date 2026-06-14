@@ -78,5 +78,16 @@ services:
       AUTH_COOKIE_SECURE: "true"
       AUTH_SESSION_TTL: "720h"
 
+      # Stripe / entitlements (Plan 3). Keys come from the server-side .env (never
+      # committed). Empty secret key => checkout returns 503 and the webhook is
+      # not wired, so the app stays healthy until keys are provided.
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_PRICE_ID: ${STRIPE_PRICE_ID:-}
+      STRIPE_SUCCESS_URL: "https://lindentar.pashteto.com/editor?checkout=success"
+      STRIPE_CANCEL_URL: "https://lindentar.pashteto.com/editor"
+      # Mock checkout MUST be off in production (real Stripe only).
+      ALLOW_MOCK_CHECKOUT: "false"
+
 volumes:
   pgdata:
