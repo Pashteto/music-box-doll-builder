@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppStore } from '@/store'
 
-// Mocked paywall (Plan 4): real entitlement endpoint, Stripe still mocked.
-// Logged-out users are routed to /login; logged-in users hit mock-checkout.
+// Paywall (Plan 3): real entitlement endpoint + real Stripe Checkout (test-mode).
+// Logged-out users are routed to /login; logged-in users start a real checkout that
+// redirects to Stripe. On return, /editor?checkout=success re-checks the entitlement.
 interface PaywallScreenProps {
   onClose: () => void
 }
@@ -13,7 +14,7 @@ interface PaywallScreenProps {
 export function PaywallScreen({ onClose }: PaywallScreenProps) {
   const router = useRouter()
   const user = useAppStore((s) => s.user)
-  const mockCheckout = useAppStore((s) => s.mockCheckout)
+  const startCheckout = useAppStore((s) => s.startCheckout)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -25,12 +26,11 @@ export function PaywallScreen({ onClose }: PaywallScreenProps) {
     setPending(true)
     setError(null)
     try {
-      await mockCheckout()
-      onClose()
+      // Redirects to the Stripe-hosted page; the promise typically never resolves
+      // because navigation happens first. If it throws, checkout is unavailable.
+      await startCheckout()
     } catch {
-      // Entitlements backend may be unavailable (Plan 3 not deployed) — never crash.
-      setError('Unlocking is unavailable right now. Please try again later.')
-    } finally {
+      setError('Checkout is unavailable right now. Please try again later.')
       setPending(false)
     }
   }

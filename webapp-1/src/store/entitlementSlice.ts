@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand'
 import type { AppState } from '@/store/types'
-import { entitlementsApi } from '@/lib/api'
+import { checkoutApi, entitlementsApi } from '@/lib/api'
 
 // Entitlement state. `entitled` now comes from the backend (Plan 3 contract).
 // First-export-free remains a client-side localStorage gate (see useEntitlement).
@@ -14,8 +14,10 @@ export interface EntitlementSlice {
   setFirstExportUsed: (used: boolean) => void
   /** Fetch entitlement for the current session; returns the (new) entitled value. */
   checkEntitlement: () => Promise<boolean>
-  /** Mocked checkout — grants entitlement server-side (no Stripe). */
+  /** Mocked checkout — grants entitlement server-side (no Stripe). Dev/test only. */
   mockCheckout: () => Promise<boolean>
+  /** Begin real Stripe checkout: redirects the browser to the Stripe-hosted page. */
+  startCheckout: () => Promise<void>
 }
 
 export const createEntitlementSlice: StateCreator<AppState, [], [], EntitlementSlice> = (
@@ -48,5 +50,10 @@ export const createEntitlementSlice: StateCreator<AppState, [], [], EntitlementS
     const { entitled } = await entitlementsApi.mockCheckout()
     set({ entitled })
     return entitled
+  },
+
+  startCheckout: async () => {
+    const { checkoutUrl } = await checkoutApi.session()
+    if (typeof window !== 'undefined') window.location.assign(checkoutUrl)
   },
 })

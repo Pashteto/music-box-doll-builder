@@ -62,6 +62,12 @@ func (m *mockService) UpsertProject(userID uuid.UUID, p *domainmodels.Project) (
 func (m *mockService) DeleteProject(userID, id uuid.UUID) error {
 	return nil
 }
+func (m *mockService) Entitlement(userID uuid.UUID) (bool, string, error) { return false, "", nil }
+func (m *mockService) GrantMock(userID uuid.UUID) error                   { return nil }
+func (m *mockService) GrantFromStripe(_, _, _, _ string) error            { return nil }
+func (m *mockService) CheckoutSession(userID uuid.UUID, email string) (string, error) {
+	return "", nil
+}
 
 func TestNewModule(t *testing.T) {
 	cfg := &config.HTTPConfig{
@@ -75,7 +81,7 @@ func TestNewModule(t *testing.T) {
 	}
 
 	svc := &mockService{}
-	module := NewModule(cfg, nil, svc, nil)
+	module := NewModule(cfg, nil, nil, svc, nil)
 
 	if module == nil {
 		t.Fatal("NewModule returned nil")
@@ -97,7 +103,7 @@ func TestModule_Name(t *testing.T) {
 		Timeout: "30s",
 	}
 	svc := &mockService{}
-	module := NewModule(cfg, nil, svc, nil)
+	module := NewModule(cfg, nil, nil, svc, nil)
 
 	name := module.Name()
 	if name != "http" {
@@ -122,7 +128,7 @@ func TestModule_Init(t *testing.T) {
 	}
 
 	svc := &mockService{}
-	module := NewModule(cfg, nil, svc, nil)
+	module := NewModule(cfg, nil, nil, svc, nil)
 
 	ctx := context.Background()
 	err := module.Init(ctx)
@@ -166,7 +172,7 @@ func TestModule_Init_InvalidTimeout(t *testing.T) {
 	}
 
 	svc := &mockService{}
-	module := NewModule(cfg, nil, svc, nil)
+	module := NewModule(cfg, nil, nil, svc, nil)
 
 	ctx := context.Background()
 	err := module.Init(ctx)
@@ -187,7 +193,7 @@ func TestModule_Init_InvalidHostOrPort(t *testing.T) {
 		}
 
 		svc := &mockService{}
-		module := NewModule(cfg, nil, svc, nil)
+		module := NewModule(cfg, nil, nil, svc, nil)
 
 		ctx := context.Background()
 		err := module.Init(ctx)
@@ -207,7 +213,7 @@ func TestModule_Init_InvalidHostOrPort(t *testing.T) {
 		}
 
 		svc := &mockService{}
-		module := NewModule(cfg, nil, svc, nil)
+		module := NewModule(cfg, nil, nil, svc, nil)
 
 		ctx := context.Background()
 		err := module.Init(ctx)
@@ -237,7 +243,7 @@ func TestModule_Lifecycle(t *testing.T) {
 	}
 
 	svc := &mockService{}
-	module := NewModule(cfg, nil, svc, nil)
+	module := NewModule(cfg, nil, nil, svc, nil)
 
 	ctx := context.Background()
 
@@ -280,7 +286,7 @@ func TestModule_Stop_WithoutStart(t *testing.T) {
 	}
 
 	svc := &mockService{}
-	module := NewModule(cfg, nil, svc, nil)
+	module := NewModule(cfg, nil, nil, svc, nil)
 
 	ctx := context.Background()
 
@@ -299,7 +305,7 @@ func TestModule_HealthCheck(t *testing.T) {
 	}
 
 	svc := &mockService{}
-	module := NewModule(cfg, nil, svc, nil)
+	module := NewModule(cfg, nil, nil, svc, nil)
 
 	ctx := context.Background()
 

@@ -75,6 +75,18 @@ export default function EditorPage() {
     }
   }, [projectId])
 
+  // Returning from Stripe Checkout: re-check entitlement, then strip the query param.
+  const checkEntitlement = useAppStore((s) => s.checkEntitlement)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('checkout') !== 'success') return
+    void checkEntitlement()
+    params.delete('checkout')
+    const qs = params.toString()
+    window.history.replaceState({}, '', window.location.pathname + (qs ? `?${qs}` : ''))
+  }, [checkEntitlement])
+
   const currentSlot = PHASE1_SLOTS[currentStep] ?? PHASE1_SLOTS[0]!
   const currentSel = slotSelections.find((s) => s.slotType === currentSlot)
   const currentEntry = currentSel?.assetId

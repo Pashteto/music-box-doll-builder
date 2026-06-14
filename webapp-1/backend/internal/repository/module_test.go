@@ -37,6 +37,12 @@ func (m *moduleMockRepository) ListProjects(_ uuid.UUID) ([]*models.Project, err
 	return nil, nil
 }
 func (m *moduleMockRepository) DeleteProject(_, _ uuid.UUID) error { return nil }
+func (m *moduleMockRepository) EntitlementByUserID(_ uuid.UUID) (*models.Entitlement, error) {
+	return nil, nil
+}
+func (m *moduleMockRepository) UpsertEntitlement(e *models.Entitlement) (*models.Entitlement, error) {
+	return e, nil
+}
 
 func TestRepositoryModule_Lifecycle(t *testing.T) {
 	t.Skip()

@@ -43,13 +43,17 @@ export function LandingClient() {
     else setBusy(false)
   }
 
-  const entrance = reduce
-    ? {}
-    : {
-        initial: { opacity: 0, y: 14 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const },
-      }
+  // Always resolve to the visible state. For reduced motion we mount directly at
+  // the target via `initial={false}` (no entry animation) — critically this also
+  // OVERRIDES the `opacity:0` that motion inlines into the static export's HTML.
+  // Returning `{}` here (the old behavior) left that SSR opacity:0 in place, so
+  // reduce-motion users — including every iPhone in Low Power Mode — saw a
+  // permanently blank page.
+  const entrance = {
+    initial: reduce ? false : { opacity: 0, y: 14 },
+    animate: { opacity: 1, y: 0 },
+    transition: reduce ? { duration: 0 } : { duration: 0.7, ease: [0.16, 1, 0.3, 1] as const },
+  }
 
   return (
     <div className="flex w-full max-w-md flex-col items-center gap-7">

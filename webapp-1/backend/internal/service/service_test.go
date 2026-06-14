@@ -12,7 +12,9 @@ import (
 )
 
 // serviceMockRepository is a simple in-memory repository for testing purposes.
-type serviceMockRepository struct{}
+type serviceMockRepository struct {
+	entitlements map[uuid.UUID]*models.Entitlement
+}
 
 func (m *serviceMockRepository) CreateUser(_ *models.User) error { return nil }
 func (m *serviceMockRepository) UserBy(_ *models.User, _ repository.UserGetter) error {
@@ -38,6 +40,23 @@ func (m *serviceMockRepository) ListProjects(userID uuid.UUID) ([]*models.Projec
 	return nil, nil
 }
 func (m *serviceMockRepository) DeleteProject(userID, id uuid.UUID) error { return nil }
+
+func (m *serviceMockRepository) EntitlementByUserID(userID uuid.UUID) (*models.Entitlement, error) {
+	return m.entitlements[userID], nil
+}
+func (m *serviceMockRepository) UpsertEntitlement(e *models.Entitlement) (*models.Entitlement, error) {
+	if m.entitlements == nil {
+		m.entitlements = map[uuid.UUID]*models.Entitlement{}
+	}
+	if existing, ok := m.entitlements[e.UserUUID]; ok {
+		e.UUID = existing.UUID
+	} else {
+		e.UUID = uuid.Must(uuid.NewV4())
+	}
+	stored := *e
+	m.entitlements[e.UserUUID] = &stored
+	return &stored, nil
+}
 
 func TestService_CreateUser(t *testing.T) {
 	repo := &serviceMockRepository{}

@@ -19,28 +19,31 @@ import (
 	httpserver "dollbuilder/internal/http/server"
 	"dollbuilder/internal/http/server/operations"
 	"dollbuilder/internal/service"
+	stripeclient "dollbuilder/internal/stripe"
 	"dollbuilder/pkg/logger"
 )
 
 // Module implements module.Module interface for the HTTP server.
 type Module struct {
-	config     *config.HTTPConfig
-	authConfig *config.AuthConfig
-	service    service.IService
-	grpcClient grpcclient.IClient
-	server     *httpserver.Server
-	api        *operations.DollbuilderAPIAPI
-	handler    *http.Handler
-	auth       *auth.Auth
+	config       *config.HTTPConfig
+	authConfig   *config.AuthConfig
+	stripeConfig *config.StripeConfig
+	service      service.IService
+	grpcClient   grpcclient.IClient
+	server       *httpserver.Server
+	api          *operations.DollbuilderAPIAPI
+	handler      *http.Handler
+	auth         *auth.Auth
 }
 
 // NewModule creates a new HTTP module instance.
-func NewModule(cfg *config.HTTPConfig, authCfg *config.AuthConfig, svc service.IService, grpcClient grpcclient.IClient) *Module {
+func NewModule(cfg *config.HTTPConfig, authCfg *config.AuthConfig, stripeCfg *config.StripeConfig, svc service.IService, grpcClient grpcclient.IClient) *Module {
 	return &Module{
-		config:     cfg,
-		authConfig: authCfg,
-		service:    svc,
-		grpcClient: grpcClient,
+		config:       cfg,
+		authConfig:   authCfg,
+		stripeConfig: stripeCfg,
+		service:      svc,
+		grpcClient:   grpcClient,
 	}
 }
 
@@ -152,6 +155,28 @@ func (m *Module) initAPI() error {
 	api.ProjectsUpsertProjectHandler = handlers.NewUpsertProject(m.service)
 	api.ProjectsDeleteProjectHandler = handlers.NewDeleteProject(m.service)
 
+	// Entitlements / checkout. Stripe is config-driven: an empty secret key leaves
+	// the client disabled (checkout returns 503). The webhook (raw-body, signature
+	// verified) is handled as outer middleware below, not as a swagger op.
+	allowMock := true
+	var stripeCli *stripeclient.Client
+	if m.stripeConfig != nil {
+		allowMock = m.stripeConfig.AllowMockCheckout
+		stripeCli = stripeclient.New(stripeclient.Config{
+			SecretKey:     m.stripeConfig.SecretKey,
+			WebhookSecret: m.stripeConfig.WebhookSecret,
+			PriceID:       m.stripeConfig.PriceID,
+			SuccessURL:    m.stripeConfig.SuccessURL,
+			CancelURL:     m.stripeConfig.CancelURL,
+		})
+		if s, ok := m.service.(*service.Service); ok {
+			s.SetStripe(stripeCli)
+		}
+	}
+	api.EntitlementsGetEntitlementHandler = handlers.NewGetEntitlement(m.service)
+	api.EntitlementsMockCheckoutHandler = handlers.NewMockCheckout(m.service, allowMock)
+	api.CheckoutCreateCheckoutSessionHandler = handlers.NewCreateCheckoutSession(m.service)
+
 	// TODO: Add more handlers as you expand the API
 	// api.UsersCreateUserHandler = handlers.NewCreateUser(m.service)
 	// api.UsersUpdateUserHandler = handlers.NewUpdateUser(m.service)
@@ -159,13 +184,26 @@ func (m *Module) initAPI() error {
 	// api.UsersListUsersHandler = handlers.NewListUsers(m.service)
 
 	// Build middleware chain
-	handler := alice.New(
+	chain := []alice.Constructor{
 		middlewares.Recovery(),
 		middlewares.Logger(),
 		middlewares.Cors(m.config.CORS),
 		middlewares.RateLimit(m.config.RateLimit),
-		middlewares.SessionAuth(m.service.Authenticate),
-	).Then(api.Serve(nil))
+	}
+	// Stripe webhook: intercept the raw body before swagger parses it, verify the
+	// signature, and grant the entitlement. Only wired when Stripe is configured.
+	if stripeCli != nil && stripeCli.Enabled() {
+		verify := func(payload []byte, sig string) (string, string, string, bool, error) {
+			cs, isGrant, err := stripeCli.VerifyAndParse(payload, sig)
+			if err != nil || !isGrant {
+				return "", "", "", false, err
+			}
+			return cs.UserID, cs.CustomerID, cs.PaymentIntentID, true, nil
+		}
+		chain = append(chain, middlewares.StripeWebhook("/api/v1/webhooks/stripe", verify, m.service))
+	}
+	chain = append(chain, middlewares.SessionAuth(m.service.Authenticate))
+	handler := alice.New(chain...).Then(api.Serve(nil))
 
 	m.api = api
 	m.handler = &handler

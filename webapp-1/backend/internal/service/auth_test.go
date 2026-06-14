@@ -5,16 +5,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gofrs/uuid"
 	"dollbuilder/internal/models"
 	"dollbuilder/internal/repository"
+	"github.com/gofrs/uuid"
 )
 
 type authMockRepo struct {
 	repository.IRepository // embedded (nil); only auth methods overridden
-	usersByEmail map[string]*models.User
-	usersByID    map[uuid.UUID]*models.User
-	sessions     map[string]*models.Session
+	usersByEmail           map[string]*models.User
+	usersByID              map[uuid.UUID]*models.User
+	sessions               map[string]*models.Session
 }
 
 func newAuthMockRepo() *authMockRepo {
@@ -46,7 +46,10 @@ func (m *authMockRepo) UserByUUID(id uuid.UUID) (*models.User, error) {
 	}
 	return u, nil
 }
-func (m *authMockRepo) CreateSession(s *models.Session) error { m.sessions[s.TokenHash] = s; return nil }
+func (m *authMockRepo) CreateSession(s *models.Session) error {
+	m.sessions[s.TokenHash] = s
+	return nil
+}
 func (m *authMockRepo) SessionByTokenHash(h string) (*models.Session, error) {
 	s, ok := m.sessions[h]
 	if !ok {

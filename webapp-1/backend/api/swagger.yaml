@@ -245,7 +245,53 @@ paths:
         401: { description: Not authenticated, schema: { $ref: "#/definitions/Error" } }
         500: { description: Server error, schema: { $ref: "#/definitions/Error" } }
 
+  /entitlements:
+    get:
+      summary: Current user's export entitlement
+      operationId: getEntitlement
+      tags: [entitlements]
+      security: []
+      responses:
+        200: { description: Entitlement state, schema: { $ref: "#/definitions/Entitlement" } }
+        401: { description: Not authenticated, schema: { $ref: "#/definitions/Error" } }
+        500: { description: Server error, schema: { $ref: "#/definitions/Error" } }
+
+  /entitlements/mock-checkout:
+    post:
+      summary: Grant entitlement via the mock path (dev/test only)
+      operationId: mockCheckout
+      tags: [entitlements]
+      security: []
+      responses:
+        200: { description: Entitlement granted, schema: { $ref: "#/definitions/Entitlement" } }
+        401: { description: Not authenticated, schema: { $ref: "#/definitions/Error" } }
+        403: { description: Mock checkout disabled, schema: { $ref: "#/definitions/Error" } }
+        500: { description: Server error, schema: { $ref: "#/definitions/Error" } }
+
+  /checkout/session:
+    post:
+      summary: Create a Stripe Checkout session
+      operationId: createCheckoutSession
+      tags: [checkout]
+      security: []
+      responses:
+        200: { description: Checkout URL, schema: { $ref: "#/definitions/CheckoutSession" } }
+        401: { description: Not authenticated, schema: { $ref: "#/definitions/Error" } }
+        500: { description: Server error, schema: { $ref: "#/definitions/Error" } }
+        503: { description: Checkout not configured, schema: { $ref: "#/definitions/Error" } }
+
 definitions:
+  Entitlement:
+    type: object
+    required: [entitled]
+    properties:
+      entitled: { type: boolean }
+      source: { type: string }
+  CheckoutSession:
+    type: object
+    required: [checkoutUrl]
+    properties:
+      checkoutUrl: { type: string }
   User:
     type: object
     required:

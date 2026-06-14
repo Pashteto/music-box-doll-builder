@@ -97,13 +97,23 @@ export const projectsApi = {
   remove: (id: string) => apiFetch<null>(`/api/v1/projects/${id}`, { method: 'DELETE' }),
 }
 
-// Plan 3 contract (backend NOT deployed yet) — documented in the parent design.
+// Plan 3 contract — backend implemented (entitlements + Stripe test-mode).
 export interface Entitlement {
   entitled: boolean
+  source?: string
 }
 
 export const entitlementsApi = {
   get: () => apiFetch<Entitlement>('/api/v1/entitlements'),
   mockCheckout: () =>
     apiFetch<Entitlement>('/api/v1/entitlements/mock-checkout', { method: 'POST' }),
+}
+
+export interface CheckoutSession {
+  checkoutUrl: string
+}
+
+export const checkoutApi = {
+  // Creates a real Stripe Checkout (test-mode) session; returns the hosted-page URL.
+  session: () => apiFetch<CheckoutSession>('/api/v1/checkout/session', { method: 'POST' }),
 }

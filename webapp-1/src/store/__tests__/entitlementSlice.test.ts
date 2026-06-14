@@ -2,10 +2,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 vi.mock('@/lib/api', () => ({
   entitlementsApi: { get: vi.fn(), mockCheckout: vi.fn() },
+  checkoutApi: { session: vi.fn() },
 }))
 
 import { useAppStore } from '@/store'
-import { entitlementsApi } from '@/lib/api'
+import { checkoutApi, entitlementsApi } from '@/lib/api'
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -32,5 +33,16 @@ describe('entitlementSlice (server-backed)', () => {
     const result = await useAppStore.getState().mockCheckout()
     expect(result).toBe(true)
     expect(useAppStore.getState().entitled).toBe(true)
+  })
+
+  it('startCheckout redirects to the Stripe checkout URL', async () => {
+    vi.mocked(checkoutApi.session).mockResolvedValue({ checkoutUrl: 'https://stripe.test/c/xyz' })
+    const assign = vi.fn()
+    Object.defineProperty(window, 'location', {
+      value: { assign, search: '', pathname: '/editor' },
+      writable: true,
+    })
+    await useAppStore.getState().startCheckout()
+    expect(assign).toHaveBeenCalledWith('https://stripe.test/c/xyz')
   })
 })
