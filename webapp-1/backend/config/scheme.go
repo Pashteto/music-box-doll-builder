@@ -121,6 +121,14 @@ type CacheConfig struct {
 	DB       int    `mapstructure:"db"`
 }
 
+// MetricsConfig configures the Prometheus /metrics listener. It is served on its
+// own port, separate from the API, and is intended to be reachable only on the
+// internal network (never published to the host / never proxied by nginx).
+type MetricsConfig struct {
+	Enabled bool `mapstructure:"enabled"`
+	Port    int  `mapstructure:"port"`
+}
+
 // Scheme represents the application configuration scheme.
 type Scheme struct {
 	// Database configuration for repository module (optional; nil if disabled).
@@ -146,6 +154,9 @@ type Scheme struct {
 
 	// Stripe configuration for the entitlements/checkout flow (optional; empty key disables it).
 	Stripe *StripeConfig `mapstructure:"stripe"`
+
+	// Metrics configuration for the Prometheus /metrics listener.
+	Metrics *MetricsConfig `mapstructure:"metrics"`
 
 	// Env is the application environment (e.g. prod, dev, local).
 	Env string `mapstructure:"env"`

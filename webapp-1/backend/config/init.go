@@ -71,6 +71,10 @@ func setDefaults() {
 	viper.SetDefault("http.rate_limit.requests_per_sec", 100.0)
 	viper.SetDefault("http.rate_limit.burst", 20)
 
+	// Metrics module defaults (Prometheus /metrics on a separate internal port).
+	viper.SetDefault("metrics.enabled", true)
+	viper.SetDefault("metrics.port", 9100)
+
 	// Gatekeeper defaults (for future use)
 	viper.SetDefault("http.gatekeeper.address", "localhost:9091")
 	viper.SetDefault("http.gatekeeper.timeout", "5s")
