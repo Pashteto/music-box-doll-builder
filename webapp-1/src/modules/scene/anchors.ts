@@ -85,7 +85,7 @@ export function childrenOf(slot: SlotType): SlotType[] {
 export function relativeAnchorPosition(slot: SlotType): Vec3 {
   const a = SLOT_ANCHORS[slot].position
   const parent = SLOT_PARENT[slot]
-  if (!parent) return a
+  if (!parent) return [...a] as Vec3
   const p = SLOT_ANCHORS[parent].position
   return [a[0] - p[0], a[1] - p[1], a[2] - p[2]]
 }
@@ -94,7 +94,7 @@ export function relativeAnchorPosition(slot: SlotType): Vec3 {
 export function relativeAnchorRotation(slot: SlotType): Vec3 {
   const a = SLOT_ANCHORS[slot].rotation
   const parent = SLOT_PARENT[slot]
-  if (!parent) return a
+  if (!parent) return [...a] as Vec3
   const p = SLOT_ANCHORS[parent].rotation
   return [a[0] - p[0], a[1] - p[1], a[2] - p[2]]
 }
