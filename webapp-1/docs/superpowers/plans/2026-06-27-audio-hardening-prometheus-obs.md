@@ -932,11 +932,21 @@ git commit -m "feat(metrics): internal /metrics listener wired into HTTP module"
 
 **Files:**
 - Create: `webapp-1/backend/deploy/prometheus.yml`
-- Modify: `webapp-1/backend/docker-compose.prod.yml` (add `prometheus` service + `promdata` volume + metrics env on `app`)
-- Modify: `webapp-1/backend/docker-compose.yml` (add `prometheus` service for dev)
+- Modify: `webapp-1/backend/docker-compose.prod.yml` (add `prometheus` service + `promdata` volume + metrics env on `app` + log rotation on all services)
+- Modify: `webapp-1/backend/docker-compose.yml` (add `prometheus` service for dev + log rotation on all services)
 
 **Interfaces:**
 - Consumes: app metrics on `app:9100` (Task 7) over the compose network.
+
+**Bounded growth requirements (both compose files):**
+- Prometheus TSDB is size+time capped so disk use plateaus: prod
+  `--storage.tsdb.retention.time=15d --storage.tsdb.retention.size=512MB`; dev
+  `--storage.tsdb.retention.time=7d --storage.tsdb.retention.size=256MB`. The
+  `retention.size` cap is what guarantees the volume stops growing — Prometheus drops
+  the oldest blocks once the cap is hit.
+- Every service gets a `json-file` logging driver with `max-size: "10m"` + `max-file: "3"`
+  (≤30 MB of logs per container, auto-rotated) via a shared `x-logging` YAML anchor at the
+  top of each compose file. This stops container logs growing unbounded on the host.
 
 - [ ] **Step 1: Create the scrape config**
 
@@ -954,9 +964,21 @@ scrape_configs:
       - targets: ["localhost:9090"]
 ```
 
-- [ ] **Step 2: Add the prod Prometheus service**
+- [ ] **Step 2: Add the prod Prometheus service + log rotation**
 
-In `webapp-1/backend/docker-compose.prod.yml`, add metrics env to the `app` service `environment:` block (do NOT add a `ports:` entry for 9100):
+In `webapp-1/backend/docker-compose.prod.yml`, add a logging anchor at the very top of the file (above `services:`), and a `logging: *default-logging` line to **each** service (`postgres`, `redis`, `migrate`, `app`, `prometheus`):
+
+```yaml
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+```
+
+Then add metrics env to the `app` service `environment:` block (do NOT add a `ports:` entry for 9100):
 
 ```yaml
       # Prometheus metrics on an internal-only port (never published to host).
@@ -970,6 +992,7 @@ Add a new service after `app:` (before the `volumes:` block):
   prometheus:
     image: prom/prometheus:v3.1.0
     restart: unless-stopped
+    logging: *default-logging
     depends_on:
       - app
     volumes:
@@ -992,9 +1015,21 @@ volumes:
   promdata:
 ```
 
-- [ ] **Step 3: Add the dev Prometheus service**
+- [ ] **Step 3: Add the dev Prometheus service + log rotation**
 
-In `webapp-1/backend/docker-compose.yml`, add metrics env to the `app` `environment:` block:
+In `webapp-1/backend/docker-compose.yml`, add the logging anchor at the very top (above `services:`) and a `logging: *default-logging` line to each service (`postgres`, `redis`, `migrate`, `app`, `prometheus`):
+
+```yaml
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+```
+
+(The existing `version: '3.8'` line can stay above the anchor or be removed — it is obsolete in modern compose.) Add metrics env to the `app` `environment:` block:
 
 ```yaml
       # Prometheus metrics on an internal-only port.
@@ -1002,17 +1037,21 @@ In `webapp-1/backend/docker-compose.yml`, add metrics env to the `app` `environm
       METRICS_PORT: "9100"
 ```
 
-Add a `prometheus` service after `app:` — note the host UI port is `9091` because dev gRPC already publishes host `9090`:
+Add a `prometheus` service after `app:` — note the host UI port is `9091` because dev gRPC already publishes host `9090`. Dev TSDB is size-capped too so the dev volume cannot grow without bound:
 
 ```yaml
   prometheus:
     image: prom/prometheus:v3.1.0
     restart: unless-stopped
+    logging: *default-logging
     depends_on:
       - app
     volumes:
       - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    command: ["--config.file=/etc/prometheus/prometheus.yml"]
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=7d"
+      - "--storage.tsdb.retention.size=256MB"
     ports:
       - "127.0.0.1:9091:9090"
 ```
