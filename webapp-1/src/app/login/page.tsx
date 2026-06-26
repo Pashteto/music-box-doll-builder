@@ -37,9 +37,15 @@ function LoginInner() {
   return (
     <main className="flex min-h-full flex-col items-center justify-center gap-6 p-6">
       <AuthForm mode="login" onSubmit={onSubmit} error={error} pending={pending} />
-      <Link href={signupHref} className="text-sm text-foreground/70 underline">
-        Create an account
-      </Link>
+      <p className="text-sm text-text-muted">
+        New here?{' '}
+        <Link
+          href={signupHref}
+          className="text-link underline decoration-brand-primary/30 underline-offset-4 transition-colors hover:decoration-brand-primary"
+        >
+          Create an account
+        </Link>
+      </p>
     </main>
   )
 }

@@ -32,8 +32,8 @@ export function MusicSelection({ manifest, onRender }: MusicSelectionProps) {
           return (
             <div
               key={track.trackId}
-              className={`flex items-center gap-3 rounded-xl border-2 p-3 ${
-                selected ? 'border-brand-primary bg-brand-primary/5' : 'border-black/10'
+              className={`flex items-center gap-3 rounded-xl border p-3 shadow-[inset_0_1px_0_rgba(246,241,233,0.1)] transition-colors ${
+                selected ? 'border-brand-primary bg-brand-primary/10' : 'border-border bg-surface'
               }`}
             >
               <button
@@ -49,7 +49,7 @@ export function MusicSelection({ manifest, onRender }: MusicSelectionProps) {
                         : 'Play preview'
                 }
                 onClick={() => toggle(track.audioFile)}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-primary text-white disabled:opacity-50"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-primary text-sm text-foreground shadow-[0_0_0_1px_rgba(192,58,74,0.30),inset_0_1px_0_rgba(246,241,233,0.1)] transition-colors hover:bg-brand-primary-hover disabled:opacity-50"
               >
                 {glyph}
               </button>
@@ -58,8 +58,8 @@ export function MusicSelection({ manifest, onRender }: MusicSelectionProps) {
                 onClick={() => setMusicTrack(track.trackId)}
                 className="flex flex-1 flex-col items-start text-left"
               >
-                <span className="font-medium">{track.displayName}</span>
-                <span className="text-xs text-foreground/50">
+                <span className="font-medium text-text-heading">{track.displayName}</span>
+                <span className="text-xs text-text-faint">
                   {errored ? "Couldn't play — tap ↻ to retry" : `${track.durationSeconds}s`}
                 </span>
               </button>
@@ -69,10 +69,12 @@ export function MusicSelection({ manifest, onRender }: MusicSelectionProps) {
         })}
       </div>
 
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="flex justify-between text-foreground/70">
-          <span>Video length</span>
-          <span>{videoDuration}s</span>
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="flex justify-between">
+          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
+            Video length
+          </span>
+          <span className="font-mono text-xs text-brand-secondary">{videoDuration}s</span>
         </span>
         <input
           type="range"
@@ -89,9 +91,9 @@ export function MusicSelection({ manifest, onRender }: MusicSelectionProps) {
         type="button"
         onClick={onRender}
         disabled={!musicTrackId}
-        className="rounded-xl bg-brand-primary px-5 py-3 text-center font-semibold text-white active:scale-95 disabled:opacity-40"
+        className="inline-flex min-h-11 w-full items-center justify-center gap-2.5 rounded-full bg-brand-primary px-6 py-3.5 text-center text-[0.9375rem] font-semibold text-foreground shadow-[0_0_0_1px_rgba(192,58,74,0.30),0_8px_28px_-6px_rgba(161,29,44,0.45),inset_0_1px_0_rgba(246,241,233,0.1)] transition-colors hover:bg-brand-primary-hover active:translate-y-px active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-surface-overlay disabled:text-text-faint disabled:shadow-none"
       >
-        {musicTrackId ? 'Render video 🎬' : 'Pick a track first'}
+        {musicTrackId ? 'Render the film' : 'Pick a track first'}
       </button>
     </div>
   )
