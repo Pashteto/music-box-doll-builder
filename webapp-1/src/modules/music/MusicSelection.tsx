@@ -15,7 +15,7 @@ export function MusicSelection({ manifest, onRender }: MusicSelectionProps) {
   const setMusicTrack = useAppStore((s) => s.setMusicTrack)
   const videoDuration = useAppStore((s) => s.videoDuration)
   const setVideoDuration = useAppStore((s) => s.setVideoDuration)
-  const { playingUrl, toggle } = useAudioPreview()
+  const { status, activeUrl, errorUrl, toggle } = useAudioPreview()
 
   const tracks = manifest?.musicTracks ?? []
 
@@ -24,7 +24,11 @@ export function MusicSelection({ manifest, onRender }: MusicSelectionProps) {
       <div className="flex flex-col gap-2">
         {tracks.map((track) => {
           const selected = track.trackId === musicTrackId
-          const playing = playingUrl === track.audioFile
+          const isActive = activeUrl === track.audioFile
+          const playing = isActive && status === 'playing'
+          const loading = isActive && status === 'loading'
+          const errored = errorUrl === track.audioFile
+          const glyph = loading ? '…' : playing ? '❚❚' : errored ? '↻' : '▶'
           return (
             <div
               key={track.trackId}
@@ -34,11 +38,20 @@ export function MusicSelection({ manifest, onRender }: MusicSelectionProps) {
             >
               <button
                 type="button"
-                aria-label={playing ? 'Pause preview' : 'Play preview'}
+                aria-busy={loading}
+                aria-label={
+                  loading
+                    ? 'Loading preview'
+                    : playing
+                      ? 'Pause preview'
+                      : errored
+                        ? 'Retry preview'
+                        : 'Play preview'
+                }
                 onClick={() => toggle(track.audioFile)}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-primary text-white"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-primary text-white disabled:opacity-50"
               >
-                {playing ? '❚❚' : '▶'}
+                {glyph}
               </button>
               <button
                 type="button"
@@ -46,7 +59,9 @@ export function MusicSelection({ manifest, onRender }: MusicSelectionProps) {
                 className="flex flex-1 flex-col items-start text-left"
               >
                 <span className="font-medium">{track.displayName}</span>
-                <span className="text-xs text-foreground/50">{track.durationSeconds}s</span>
+                <span className="text-xs text-foreground/50">
+                  {errored ? "Couldn't play — tap ↻ to retry" : `${track.durationSeconds}s`}
+                </span>
               </button>
               {selected ? <span className="text-brand-primary">✓</span> : null}
             </div>
