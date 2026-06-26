@@ -43,3 +43,6 @@ webapp-1/backend/.env
 
 # Docker volumes
 webapp-1/docker/volumes/
+
+# Server specs & VPN credentials — never commit (kept in ../srv outside repo)
+webapp-1/servers/

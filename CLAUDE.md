@@ -53,7 +53,7 @@ Recommended implementation order: E0 → E2+E3 (parallel) → E5 → E6+E4 (para
 | `webapp-1/docs/EPICS.md` | Full epic/task breakdown with dependencies and acceptance criteria refs |
 | `webapp-1/docs/web-app-research.md` | Tech decisions, risk analysis, phased roadmap (English) |
 | `webapp-1/docs/web-master-spec-ru.md` | Full Phase 1 spec: REQ-*, AC-*, architecture, flows (Russian) |
-| `webapp-1/servers/summary.md` | oracle-1 (ARM, 7.7 GB RAM) and oracle-2 (x86, 958 MB RAM) server specs |
+| `../srv/summary.md` *(outside this repo)* | Server specs & access for oracle-1/2, vds-amnezia, vds-ru215 (kept out of the repo — contains credentials) |
 
 ## Infrastructure
 
