@@ -8,10 +8,19 @@
 #   docker compose -f docker-compose.prod.yml run --rm migrate
 #   docker compose -f docker-compose.prod.yml up -d --build
 
+# Shared log-rotation policy: cap container logs so the host disk can't fill up
+# (json-file driver, ≤3 files × 10 MB = ≤30 MB per container).
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
+    logging: *default-logging
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -22,10 +31,12 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    logging: *default-logging
     command: ["redis-server", "--save", "", "--appendonly", "no"]
 
   migrate:
     image: migrate/migrate
+    logging: *default-logging
     depends_on:
       - postgres
     volumes:
@@ -41,6 +52,7 @@ services:
   app:
     build: .
     restart: unless-stopped
+    logging: *default-logging
     depends_on:
       - postgres
       - redis
@@ -89,5 +101,29 @@ services:
       # Mock checkout MUST be off in production (real Stripe only).
       ALLOW_MOCK_CHECKOUT: "false"
 
+      # Prometheus metrics on an internal-only port (NEVER published to the host).
+      METRICS_ENABLED: "true"
+      METRICS_PORT: "9100"
+
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    restart: unless-stopped
+    logging: *default-logging
+    depends_on:
+      - app
+    volumes:
+      - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - promdata:/prometheus
+    command:
+      # retention.size is the hard cap that stops the TSDB volume growing forever;
+      # Prometheus drops the oldest blocks once 512MB (or 15 days) is reached.
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=15d"
+      - "--storage.tsdb.retention.size=512MB"
+    # UI bound to loopback only; nginx proxies a public subdomain with basic auth.
+    ports:
+      - "127.0.0.1:9090:9090"
+
 volumes:
   pgdata:
+  promdata:

@@ -1,9 +1,15 @@
-version: '3.8'
+# Shared log-rotation policy (json-file, ≤3 × 10 MB per container).
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
 
 services:
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
+    logging: *default-logging
     ports:
       - "5432:5432"
     environment:
@@ -15,11 +21,13 @@ services:
 
   redis:
     image: redis:7-alpine
+    logging: *default-logging
     ports: ["6379:6379"]
     command: ["redis-server", "--save", "", "--appendonly", "no"]
 
   migrate:
     image: migrate/migrate
+    logging: *default-logging
     depends_on:
       - postgres
     volumes:
@@ -29,6 +37,7 @@ services:
   app:
     build: .
     restart: unless-stopped
+    logging: *default-logging
     depends_on:
       - postgres
       - redis
@@ -56,3 +65,22 @@ services:
       CACHE_ENABLED: "true"
       CACHE_HOST: redis
       CACHE_PORT: "6379"
+      # Prometheus metrics on an internal-only port.
+      METRICS_ENABLED: "true"
+      METRICS_PORT: "9100"
+
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    restart: unless-stopped
+    logging: *default-logging
+    depends_on:
+      - app
+    volumes:
+      - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=7d"
+      - "--storage.tsdb.retention.size=256MB"
+    # Host UI port 9091 (dev gRPC already owns host 9090).
+    ports:
+      - "127.0.0.1:9091:9090"
