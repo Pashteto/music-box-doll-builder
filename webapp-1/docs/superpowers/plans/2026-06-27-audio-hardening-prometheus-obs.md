@@ -2,6 +2,13 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **STATUS (2026-06-27): ✅ ALL 9 TASKS EXECUTED & COMMITTED** on branch
+> `feat/audio-hardening-prometheus-obs` (local — not pushed/merged/deployed). Frontend
+> typecheck clean + 65 tests pass; backend builds + `go test ./...` passes; compose files
+> validate. Remaining work (PR, oracle-1 rollout, on-device check) is tracked in
+> `../handoffs/2026-06-27-audio-hardening-prometheus-obs-handoff.md`. The unchecked `- [ ]`
+> boxes below are the original plan steps, kept as the historical record — the work is done.
+
 **Goal:** Surface audio failures to the user (preview + render) instead of silent failure, and expose Prometheus metrics from the Go backend scraped by a Prometheus instance in the same docker-compose orchestration.
 
 **Architecture:** Frontend — convert the render audio decoder to a typed result with timeout/retry and thread a warning callback through both render pipelines to the render UI; give the Howler-based preview an explicit status machine wired to Howler's lifecycle events. Backend — a Prometheus instrumentation middleware in the existing `justinas/alice` chain plus a dedicated `/metrics` HTTP listener on an internal-only port (9100), scraped by a `prom/prometheus` compose service whose UI sits behind nginx basic-auth + TLS.
