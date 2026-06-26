@@ -144,3 +144,37 @@ returns healthy from the public internet.
 The app already sets `AUTH_COOKIE_SECURE=true` and CORS allows
 `https://lindentar.pashteto.com` with credentials, so the frontend (oracle-2) can call
 the API cross-subdomain once DNS+TLS are live. (Frontend wiring itself is Plan 4.)
+
+## Observability — Prometheus (oracle-1)
+
+Metrics are exposed by the app on an internal-only port (`9100`, never published to
+the host) and scraped by a Prometheus container in the same compose project. The
+Prometheus UI is reachable at `https://prometheus.lindentar.pashteto.com` behind
+nginx basic auth + TLS. The TSDB is size-capped (`--storage.tsdb.retention.size=512MB`,
+`--storage.tsdb.retention.time=15d`) so the `promdata` volume cannot grow without
+bound, and all containers use `json-file` log rotation (≤30 MB each).
+
+**Apply (human-run on the server):**
+
+1. Pull + redeploy (rebuilds the app with the metrics listener, starts Prometheus):
+   ```
+   git pull
+   docker compose -f docker-compose.prod.yml up -d --build
+   ```
+2. Confirm scraping locally: `curl -s localhost:9090/api/v1/targets | grep dollbuilder`
+   should show the `app:9100` target as `"health":"up"`.
+3. DNS: add an A record `prometheus.lindentar.pashteto.com` → oracle-1.
+4. Basic-auth credentials (never committed):
+   ```
+   sudo htpasswd -c /etc/nginx/.htpasswd-prometheus <user>
+   ```
+5. Install the vhost from `../deploy/prometheus.nginx.conf`, then:
+   ```
+   sudo nginx -t && sudo systemctl reload nginx
+   sudo certbot --nginx -d prometheus.lindentar.pashteto.com
+   ```
+6. Verify: `curl -u <user>:<REDACTED> https://prometheus.lindentar.pashteto.com/-/healthy`.
+
+**Notes:** `/metrics` (port 9100) must never appear in a compose `ports:` list. The
+Prometheus UI binds `127.0.0.1:9090` so it is only reachable through nginx. This adds
+a public endpoint — record it in change-management/audit notes.
