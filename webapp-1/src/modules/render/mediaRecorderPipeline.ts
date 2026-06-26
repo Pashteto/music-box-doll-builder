@@ -4,7 +4,7 @@ import type { RenderParams, RenderResult } from '@/modules/render/renderTypes'
 import { detectRenderPipeline } from '@/modules/render/codecDetection'
 
 export async function renderMediaRecorderVideo(params: RenderParams): Promise<RenderResult> {
-  const { fps, durationSeconds, audioUrl, drawFrame, onProgress } = params
+  const { fps, durationSeconds, audioUrl, drawFrame, onProgress, onWarning } = params
   const caps = await detectRenderPipeline()
   const mime = caps.mediaRecorderMime
   if (typeof MediaRecorder === 'undefined' || !mime) {
@@ -37,6 +37,8 @@ export async function renderMediaRecorderVideo(params: RenderParams): Promise<Re
       hasAudio = true
     } catch {
       hasAudio = false
+      console.warn('[render] audio attach failed; rendering silent video')
+      onWarning?.("Music couldn't be added — rendering without audio.")
     }
   }
 

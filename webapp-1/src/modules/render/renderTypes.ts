@@ -8,6 +8,8 @@ export interface RenderParams {
   /** Render frame `i` of `total` and return the canvas to capture. */
   drawFrame: (i: number, total: number) => HTMLCanvasElement
   onProgress?: (fraction: number) => void
+  /** Called when the render proceeds without audio due to a decode/attach failure. */
+  onWarning?: (message: string) => void
 }
 
 export interface RenderResult {

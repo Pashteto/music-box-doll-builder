@@ -8,7 +8,7 @@ const AUDIO_CHUNK_FRAMES = 1024
 
 /** Render an MP4 using WebCodecs. Falls back to silent video if audio encoding fails. */
 export async function renderWebCodecsMp4(params: RenderParams): Promise<RenderResult> {
-  const { width, height, fps, durationSeconds, audioUrl, drawFrame, onProgress } = params
+  const { width, height, fps, durationSeconds, audioUrl, drawFrame, onProgress, onWarning } = params
   const caps = await detectRenderPipeline(width, height, fps)
   if (caps.pipeline !== 'webcodecs' || !caps.videoCodec) {
     throw new Error('WebCodecs video encoding is not supported')
@@ -18,7 +18,12 @@ export async function renderWebCodecsMp4(params: RenderParams): Promise<RenderRe
   const wantAudio = !!audioUrl && caps.hasAudioEncoder
 
   // Pre-decode audio so we know the channel count for the muxer config.
-  const decoded = wantAudio ? await decodeAudioToDuration(audioUrl!, durationSeconds) : null
+  const decodeResult = wantAudio ? await decodeAudioToDuration(audioUrl!, durationSeconds) : null
+  if (decodeResult && !decodeResult.ok) {
+    console.warn(`[render] audio decode failed (${decodeResult.reason}); rendering silent video`)
+    onWarning?.("Music couldn't be added — rendering without audio.")
+  }
+  const decoded = decodeResult?.ok ? decodeResult.audio : null
 
   const muxer = new Muxer({
     target: new ArrayBufferTarget(),

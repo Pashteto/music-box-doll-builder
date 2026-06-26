@@ -58,6 +58,7 @@ export function RenderScreen({ manifest, onBack }: RenderScreenProps) {
   const [status, setStatus] = useState<Status>('preparing')
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [warning, setWarning] = useState<string | null>(null)
   const [showPaywall, setShowPaywall] = useState(false)
   const [result, setResult] = useState<{
     url: string
@@ -104,6 +105,7 @@ export function RenderScreen({ manifest, onBack }: RenderScreenProps) {
     if (!handles) return
     setStatus('rendering')
     setError(null)
+    setWarning(null)
 
     const caps = await detectRenderPipeline(RENDER_WIDTH, RENDER_HEIGHT, RENDER_FPS)
     if (caps.pipeline === 'none') {
@@ -122,6 +124,7 @@ export function RenderScreen({ manifest, onBack }: RenderScreenProps) {
         audioUrl,
         drawFrame: drawer.drawFrame,
         onProgress: (f: number) => setProgress(f),
+        onWarning: (msg: string) => setWarning(msg),
       }
       const res: RenderResult =
         caps.pipeline === 'webcodecs'
@@ -165,6 +168,11 @@ export function RenderScreen({ manifest, onBack }: RenderScreenProps) {
 
   return (
     <div className="flex flex-col gap-4">
+      {warning ? (
+        <div role="status" className="rounded-lg bg-amber-100 px-3 py-2 text-sm text-amber-900">
+          {warning}
+        </div>
+      ) : null}
       {/* Offscreen render rig (visually hidden, real WebGL context). */}
       <div
         aria-hidden
