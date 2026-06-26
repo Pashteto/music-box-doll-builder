@@ -25,25 +25,28 @@ import (
 
 // Module implements module.Module interface for the HTTP server.
 type Module struct {
-	config       *config.HTTPConfig
-	authConfig   *config.AuthConfig
-	stripeConfig *config.StripeConfig
-	service      service.IService
-	grpcClient   grpcclient.IClient
-	server       *httpserver.Server
-	api          *operations.DollbuilderAPIAPI
-	handler      *http.Handler
-	auth         *auth.Auth
+	config        *config.HTTPConfig
+	authConfig    *config.AuthConfig
+	stripeConfig  *config.StripeConfig
+	metricsConfig *config.MetricsConfig
+	metricsServer *http.Server
+	service       service.IService
+	grpcClient    grpcclient.IClient
+	server        *httpserver.Server
+	api           *operations.DollbuilderAPIAPI
+	handler       *http.Handler
+	auth          *auth.Auth
 }
 
 // NewModule creates a new HTTP module instance.
-func NewModule(cfg *config.HTTPConfig, authCfg *config.AuthConfig, stripeCfg *config.StripeConfig, svc service.IService, grpcClient grpcclient.IClient) *Module {
+func NewModule(cfg *config.HTTPConfig, authCfg *config.AuthConfig, stripeCfg *config.StripeConfig, metricsCfg *config.MetricsConfig, svc service.IService, grpcClient grpcclient.IClient) *Module {
 	return &Module{
-		config:       cfg,
-		authConfig:   authCfg,
-		stripeConfig: stripeCfg,
-		service:      svc,
-		grpcClient:   grpcClient,
+		config:        cfg,
+		authConfig:    authCfg,
+		stripeConfig:  stripeCfg,
+		metricsConfig: metricsCfg,
+		service:       svc,
+		grpcClient:    grpcClient,
 	}
 }
 
@@ -84,6 +87,16 @@ func (m *Module) Start(_ context.Context) error {
 		}
 	}()
 
+	if m.metricsConfig != nil && m.metricsConfig.Enabled {
+		m.metricsServer = newMetricsServer(m.metricsConfig.Port, "dev")
+		go func() {
+			logger.Log().Infof("metrics server listening on :%d/metrics", m.metricsConfig.Port)
+			if err := m.metricsServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				logger.Log().Errorf("metrics server error: %v", err)
+			}
+		}()
+	}
+
 	return nil
 }
 
@@ -94,6 +107,12 @@ func (m *Module) Stop(_ context.Context) error {
 	if m.server != nil {
 		if err := m.server.Shutdown(); err != nil {
 			return fmt.Errorf("shutdown server: %w", err)
+		}
+	}
+
+	if m.metricsServer != nil {
+		if err := m.metricsServer.Shutdown(context.Background()); err != nil {
+			logger.Log().Errorf("shutdown metrics server: %v", err)
 		}
 	}
 
@@ -186,6 +205,7 @@ func (m *Module) initAPI() error {
 	// Build middleware chain
 	chain := []alice.Constructor{
 		middlewares.Recovery(),
+		middlewares.Metrics(),
 		middlewares.Logger(),
 		middlewares.Cors(m.config.CORS),
 		middlewares.RateLimit(m.config.RateLimit),
