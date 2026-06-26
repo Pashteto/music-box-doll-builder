@@ -1,9 +1,10 @@
 'use client'
 
 import { useAppStore } from '@/store'
-import { SlotMesh } from '@/modules/scene/SlotMesh'
+import { SlotFrame } from '@/modules/scene/SlotMesh'
 import { AssetLoader } from '@/modules/catalog/AssetLoader'
 import { getAssetById } from '@/modules/catalog/useCatalog'
+import { ROOT_SLOTS } from '@/modules/scene/anchors'
 import type { CatalogManifest } from '@/lib/catalog-types'
 import type { SlotType } from '@/lib/types'
 
@@ -16,9 +17,10 @@ interface DollCompositionProps {
 }
 
 /**
- * Renders the assembled doll from store state (E6-T3): one SlotMesh per non-empty
- * slot, plus optional scene background/foreground. Re-keys by slotType so changing
- * one slot never disturbs the others.
+ * Renders the assembled doll from store state (E6-T3, E-transform): one recursive
+ * SlotFrame per root slot (children nest inside their parent), plus optional scene
+ * background/foreground. Re-keys by root slotType so changing one slot never
+ * disturbs the others.
  */
 export function DollComposition({
   manifest,
@@ -35,15 +37,14 @@ export function DollComposition({
 
   return (
     <>
-      {slotSelections.map((sel) => (
-        <SlotMesh
-          key={sel.slotType}
-          slotType={sel.slotType}
-          assetId={sel.assetId}
-          glbFile={sel.assetId ? (getAssetById(sel.assetId, manifest)?.glbFile ?? null) : null}
-          transform={sel.transform}
-          selected={selectedSlot === sel.slotType}
-          onSelect={onSelectSlot}
+      {ROOT_SLOTS.map((slot) => (
+        <SlotFrame
+          key={slot}
+          slotType={slot}
+          selections={slotSelections}
+          manifest={manifest}
+          selectedSlot={selectedSlot}
+          onSelectSlot={onSelectSlot}
         />
       ))}
       {bg ? <AssetLoader url={bg.glbFile} transform={bg.defaultTransform} /> : null}
