@@ -1,4 +1,4 @@
-import type { SlotType, Vec3 } from '@/lib/types'
+import { SLOT_TYPES, type SlotType, type Vec3 } from '@/lib/types'
 
 export interface Anchor {
   position: Vec3
@@ -40,4 +40,61 @@ export const SLOT_PARENT: Partial<Record<SlotType, SlotType>> = {
   halo: 'head',
   collar: 'bodyShell',
   innerInsert: 'bodyShell',
+}
+
+/** An axis-aligned offset box around a slot's anchor (units), used to clamp position nudges. */
+export interface OffsetBox {
+  min: Vec3
+  max: Vec3
+}
+
+/**
+ * Per-slot position-offset limits (E-transform). Deliberately tight — this is a
+ * "nudge for polish" feature, not free placement. Because anchors are fixed and
+ * these boxes are small, nonsense placements are impossible by geometry (e.g. the
+ * head can never reach the feet). Tune by eye; keep the head-above-feet invariant.
+ */
+export const SLOT_POSITION_BOUNDS: Record<SlotType, OffsetBox> = {
+  head: { min: [-0.2, -0.25, -0.15], max: [0.2, 0.25, 0.15] },
+  hair: { min: [-0.12, -0.15, -0.12], max: [0.12, 0.15, 0.12] },
+  hat: { min: [-0.12, -0.15, -0.12], max: [0.12, 0.15, 0.12] },
+  horns: { min: [-0.12, -0.15, -0.12], max: [0.12, 0.15, 0.12] },
+  halo: { min: [-0.12, -0.15, -0.12], max: [0.12, 0.15, 0.12] },
+  collar: { min: [-0.12, -0.12, -0.1], max: [0.12, 0.12, 0.1] },
+  innerInsert: { min: [-0.12, -0.12, -0.1], max: [0.12, 0.12, 0.1] },
+  bodyShell: { min: [-0.1, -0.1, -0.1], max: [0.1, 0.1, 0.1] },
+  lowerBody: { min: [-0.1, -0.1, -0.1], max: [0.1, 0.1, 0.1] },
+  feetBase: { min: [-0.1, -0.1, -0.1], max: [0.1, 0.1, 0.1] },
+  leftHand: { min: [-0.3, -0.25, -0.2], max: [0.3, 0.25, 0.2] },
+  rightHand: { min: [-0.3, -0.25, -0.2], max: [0.3, 0.25, 0.2] },
+  leftSleeve: { min: [-0.15, -0.15, -0.12], max: [0.15, 0.15, 0.12] },
+  rightSleeve: { min: [-0.15, -0.15, -0.12], max: [0.15, 0.15, 0.12] },
+  wings: { min: [-0.15, -0.15, -0.15], max: [0.15, 0.15, 0.15] },
+  tail: { min: [-0.15, -0.15, -0.15], max: [0.15, 0.15, 0.15] },
+}
+
+/** Slots with no parent — rendered at their absolute anchor. */
+export const ROOT_SLOTS: SlotType[] = SLOT_TYPES.filter((s) => !SLOT_PARENT[s])
+
+/** Direct children of a slot in the attachment hierarchy. */
+export function childrenOf(slot: SlotType): SlotType[] {
+  return SLOT_TYPES.filter((s) => SLOT_PARENT[s] === slot)
+}
+
+/** A slot's anchor position expressed relative to its parent (absolute if it has no parent). */
+export function relativeAnchorPosition(slot: SlotType): Vec3 {
+  const a = SLOT_ANCHORS[slot].position
+  const parent = SLOT_PARENT[slot]
+  if (!parent) return a
+  const p = SLOT_ANCHORS[parent].position
+  return [a[0] - p[0], a[1] - p[1], a[2] - p[2]]
+}
+
+/** A slot's anchor rotation expressed relative to its parent (absolute if it has no parent). */
+export function relativeAnchorRotation(slot: SlotType): Vec3 {
+  const a = SLOT_ANCHORS[slot].rotation
+  const parent = SLOT_PARENT[slot]
+  if (!parent) return a
+  const p = SLOT_ANCHORS[parent].rotation
+  return [a[0] - p[0], a[1] - p[1], a[2] - p[2]]
 }
