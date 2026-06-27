@@ -66,7 +66,8 @@ Phase 1 scope: 1 doll template, 3-5 active slots, 20-30 GLB assets, 1 scene temp
 ## Architecture Patterns
 
 - **Slot-based composition** -- doll = typed array of slots, each with optional asset ref + constrained transform
-- **Constrained transform envelope** -- each asset defines allowed ranges; editor enforces at UI level
+- **Constrained transform envelope** -- every edit funnels through one clamp layer (`applyConstraints`), so the UI can never persist an out-of-bounds value. Rotation + scale bounds come per-asset from the manifest; position-offset bounds come per-slot-type from `SLOT_POSITION_BOUNDS` (co-located with anchors). Inline per-slot Adjust panel exposes 6 DOF (move X/Y/Z, spin + 2 tilts) + scale, with Reset.
+- **Parent-following parts** -- children render nested inside their parent's transform via `SLOT_PARENT` (hair/hat/horns/halo → head; collar/insert → bodyShell): a child inherits the parent's position + rotation (never scale) and can't drift from it. Tight per-slot boxes around fixed anchors make nonsense placements impossible by geometry (e.g. head can't reach feet).
 - **Entitlement-gated export** -- paywall wraps render-share pipeline via single `checkEntitlement()` call
 - **Code splitting** -- 3D editor/R3F/Three.js lazy-imported only on editor entry; landing stays lightweight
 - **Offline-tolerant** -- GLB cached by Service Worker; projects saved in IndexedDB; creation flow works offline after initial asset load
@@ -75,13 +76,12 @@ Phase 1 scope: 1 doll template, 3-5 active slots, 20-30 GLB assets, 1 scene temp
 ## Product Flow
 
 1. Animated landing (Framer Motion + R3F demo doll)
-2. Step-by-step slot editor (head, hair, body, etc.)
-3. Global adjustment mode (tap element, constrained transforms)
-4. Scene decoration (background, foreground, floating props)
-5. Music selection (Howler.js, tap-to-play)
-6. Video render (360deg rotation, 1080x1920, 30fps, ~10s)
-7. Share/export (Web Share API or download)
-8. Paywall after first free export (Stripe Checkout)
+2. Step-by-step slot editor (head, hair, body, etc.) — each step includes an inline Adjust panel (bounded 6-DOF move/rotate + scale, with Reset); child parts follow their parent
+3. Scene decoration (background, foreground, floating props)
+4. Music selection (Howler.js, tap-to-play)
+5. Video render (360deg rotation, 1080x1920, 30fps, ~10s)
+6. Share/export (Web Share API or download)
+7. Paywall after first free export (Stripe Checkout)
 
 ## Key Data Models
 
