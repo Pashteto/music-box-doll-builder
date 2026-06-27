@@ -29,7 +29,6 @@ function Slider({
       <span className="w-24 shrink-0 text-text-secondary">{label}</span>
       <input
         type="range"
-        aria-label={label}
         min={min}
         max={max}
         step={0.01}
