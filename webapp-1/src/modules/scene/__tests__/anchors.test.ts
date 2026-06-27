@@ -55,4 +55,11 @@ describe('parent tree helpers', () => {
   it('relative rotation of a child is zero (all anchors are unrotated)', () => {
     expect(relativeAnchorRotation('hair')).toEqual([0, 0, 0])
   })
+
+  it('expresses body-subtree child anchors relative to bodyShell', () => {
+    // collar anchor [0,1.2,0] minus bodyShell anchor [0,0.2,0]
+    expect(relativeAnchorPosition('collar')).toEqual([0, 1, 0])
+    // innerInsert shares the bodyShell anchor [0,0.2,0] → zero offset
+    expect(relativeAnchorPosition('innerInsert')).toEqual([0, 0, 0])
+  })
 })

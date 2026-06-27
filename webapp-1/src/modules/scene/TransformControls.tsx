@@ -139,6 +139,7 @@ export function TransformControls({ slotType, entry }: TransformControlsProps) {
         />
       </div>
 
+      {/* Reset relies on applyConstraints returning fresh arrays — never aliases the manifest default. */}
       <button
         type="button"
         onClick={() => commit(entry.defaultTransform)}
