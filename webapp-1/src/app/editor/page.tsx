@@ -95,128 +95,143 @@ export default function EditorPage() {
   const inSlotEditor = editorMode === 'slot-editor' && !isReviewMode
 
   return (
-    <main className="flex min-h-dvh flex-col bg-background">
+    <main className="flex h-dvh flex-col overflow-hidden bg-background">
       <header className="flex items-center justify-end px-4 py-2">
         <AuthAffordance />
       </header>
-      {/* 3D stage (hidden during render — RenderScreen owns its own offscreen canvas).
+      {/* Stage + controls: stacked on mobile, two-pane (stage left, controls right) on lg+. */}
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        {/* 3D stage (hidden during render — RenderScreen owns its own offscreen canvas).
           absolute inset-0 gives the canvas a definite height; aspect-[9/16] keeps the
-          portrait product framing and centers it on wide screens. */}
-      {editorMode !== 'render' ? (
-        <div className="relative min-h-0 flex-1">
-          <div className="absolute inset-0 flex items-center justify-center p-3">
-            <DollScene className="aspect-[9/16] h-full max-w-full overflow-hidden rounded-2xl border border-border bg-background-subtle shadow-[inset_0_1px_0_rgba(246,241,233,0.12),inset_0_-36px_70px_-36px_rgba(0,0,0,0.9)]">
-              <DollComposition
-                manifest={manifest}
-                selectedSlot={inSlotEditor ? currentSlot : null}
-                showScene={!inSlotEditor}
-              />
-            </DollScene>
+          portrait product framing and centers it on wide screens. min-h keeps the stage
+          usable when stacked (mobile / narrow); on lg it fills the left pane. */}
+        {editorMode !== 'render' ? (
+          <div className="relative h-[42dvh] w-full shrink-0 lg:h-auto lg:min-h-0 lg:w-auto lg:flex-1">
+            <div className="absolute inset-0 flex items-center justify-center p-3">
+              <DollScene className="aspect-[9/16] h-full max-w-full overflow-hidden rounded-2xl border border-border bg-background-subtle shadow-[inset_0_1px_0_rgba(246,241,233,0.12),inset_0_-36px_70px_-36px_rgba(0,0,0,0.9)]">
+                <DollComposition
+                  manifest={manifest}
+                  selectedSlot={inSlotEditor ? currentSlot : null}
+                  showScene={!inSlotEditor}
+                />
+              </DollScene>
+            </div>
           </div>
-        </div>
-      ) : null}
-
-      {/* Bottom control panel */}
-      <section className="flex flex-col gap-3 rounded-t-3xl border-t border-border-glaze bg-gradient-to-b from-surface to-background p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-20px_40px_-28px_#000]">
-        {isLoading ? (
-          <p className="text-center text-sm text-foreground/60">Loading catalog…</p>
-        ) : null}
-        {error ? (
-          <p className="text-center text-sm text-danger">Catalog failed to load: {error.message}</p>
         ) : null}
 
-        {/* Slot editor */}
-        {inSlotEditor && !isLoading ? (
-          <>
-            <div className="flex items-baseline justify-between">
-              <h2 className="font-display text-2xl font-medium text-text-heading">
-                {SLOT_LABELS[currentSlot]}
-              </h2>
-              <span className="font-mono text-xs uppercase tracking-wide text-brand-secondary">
-                {currentStep + 1} / {PHASE1_SLOTS.length}
-              </span>
-            </div>
-            <SlotCatalog slotType={currentSlot} manifest={manifest} />
-            {currentEntry ? (
-              <TransformControls slotType={currentSlot} entry={currentEntry} />
-            ) : (
-              <p className="text-xs text-text-muted">Pick an item to place it on your doll.</p>
-            )}
-            <ProgressDots total={PHASE1_SLOTS.length} current={currentStep} onJump={goToSlot} />
-            <div className="flex items-center justify-between">
-              {currentStep > 0 ? (
-                <GhostButton onClick={goToPrevSlot}>← Back</GhostButton>
-              ) : (
-                <span />
-              )}
-              <PrimaryButton onClick={goToNextSlot}>
-                {currentStep === PHASE1_SLOTS.length - 1 ? 'Done →' : 'Next →'}
-              </PrimaryButton>
-            </div>
-          </>
-        ) : null}
-
-        {/* Completion / review */}
-        {editorMode === 'slot-editor' && isReviewMode ? (
-          <>
-            <h2 className="text-center font-display text-2xl font-medium text-text-heading">
-              Your doll is ready
-            </h2>
-            <p className="text-center text-xs text-text-secondary">
-              Drag to rotate. Continue to decorate the scene.
+        {/* Controls: bottom sheet (scrolls internally) on mobile; fixed-width right pane on lg.
+          During render the stage is hidden, so the panel centers itself instead. */}
+        <section
+          className={`flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto rounded-t-3xl border-t border-border-glaze bg-gradient-to-b from-surface to-background p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-20px_40px_-28px_#000] lg:rounded-t-none lg:border-t-0 lg:shadow-none ${
+            editorMode !== 'render'
+              ? 'lg:w-[440px] lg:flex-none lg:rounded-l-3xl lg:border-l lg:border-border-glaze'
+              : 'lg:mx-auto lg:max-w-2xl'
+          }`}
+        >
+          {isLoading ? (
+            <p className="text-center text-sm text-foreground/60">Loading catalog…</p>
+          ) : null}
+          {error ? (
+            <p className="text-center text-sm text-danger">
+              Catalog failed to load: {error.message}
             </p>
-            <div className="flex items-center justify-between">
-              <GhostButton
-                onClick={() => {
-                  setReviewMode(false)
-                  goToSlot(PHASE1_SLOTS.length - 1)
-                }}
-              >
-                ← Back to slots
-              </GhostButton>
-              <PrimaryButton onClick={() => setEditorMode('scene')}>Continue →</PrimaryButton>
-            </div>
-          </>
-        ) : null}
+          ) : null}
 
-        {/* Scene composer */}
-        {editorMode === 'scene' ? (
-          <>
-            <h2 className="font-display text-2xl font-medium text-text-heading">
-              Decorate the scene
-            </h2>
-            <SceneComposer manifest={manifest} />
-            <div className="flex items-center justify-between">
-              <GhostButton
-                onClick={() => {
-                  setEditorMode('slot-editor')
-                  setReviewMode(true)
-                }}
-              >
-                ← Back
-              </GhostButton>
-              <PrimaryButton onClick={() => setEditorMode('music')}>Continue →</PrimaryButton>
-            </div>
-          </>
-        ) : null}
+          {/* Slot editor */}
+          {inSlotEditor && !isLoading ? (
+            <>
+              <div className="flex items-baseline justify-between">
+                <h2 className="font-display text-2xl font-medium text-text-heading">
+                  {SLOT_LABELS[currentSlot]}
+                </h2>
+                <span className="font-mono text-xs uppercase tracking-wide text-brand-secondary">
+                  {currentStep + 1} / {PHASE1_SLOTS.length}
+                </span>
+              </div>
+              <SlotCatalog slotType={currentSlot} manifest={manifest} />
+              {currentEntry ? (
+                <TransformControls slotType={currentSlot} entry={currentEntry} />
+              ) : (
+                <p className="text-xs text-text-muted">Pick an item to place it on your doll.</p>
+              )}
+              <ProgressDots total={PHASE1_SLOTS.length} current={currentStep} onJump={goToSlot} />
+              <div className="flex items-center justify-between">
+                {currentStep > 0 ? (
+                  <GhostButton onClick={goToPrevSlot}>← Back</GhostButton>
+                ) : (
+                  <span />
+                )}
+                <PrimaryButton onClick={goToNextSlot}>
+                  {currentStep === PHASE1_SLOTS.length - 1 ? 'Done →' : 'Next →'}
+                </PrimaryButton>
+              </div>
+            </>
+          ) : null}
 
-        {/* Music selection */}
-        {editorMode === 'music' ? (
-          <>
-            <h2 className="font-display text-2xl font-medium text-text-heading">Pick your music</h2>
-            <MusicSelection manifest={manifest} onRender={() => setEditorMode('render')} />
-            <GhostButton onClick={() => setEditorMode('scene')}>← Back to scene</GhostButton>
-          </>
-        ) : null}
+          {/* Completion / review */}
+          {editorMode === 'slot-editor' && isReviewMode ? (
+            <>
+              <h2 className="text-center font-display text-2xl font-medium text-text-heading">
+                Your doll is ready
+              </h2>
+              <p className="text-center text-xs text-text-secondary">
+                Drag to rotate. Continue to decorate the scene.
+              </p>
+              <div className="flex items-center justify-between">
+                <GhostButton
+                  onClick={() => {
+                    setReviewMode(false)
+                    goToSlot(PHASE1_SLOTS.length - 1)
+                  }}
+                >
+                  ← Back to slots
+                </GhostButton>
+                <PrimaryButton onClick={() => setEditorMode('scene')}>Continue →</PrimaryButton>
+              </div>
+            </>
+          ) : null}
 
-        {/* Render + share */}
-        {editorMode === 'render' || editorMode === 'share' ? (
-          <>
-            <h2 className="font-display text-2xl font-medium text-text-heading">Your video</h2>
-            <RenderScreen manifest={manifest} onBack={() => setEditorMode('music')} />
-          </>
-        ) : null}
-      </section>
+          {/* Scene composer */}
+          {editorMode === 'scene' ? (
+            <>
+              <h2 className="font-display text-2xl font-medium text-text-heading">
+                Decorate the scene
+              </h2>
+              <SceneComposer manifest={manifest} />
+              <div className="flex items-center justify-between">
+                <GhostButton
+                  onClick={() => {
+                    setEditorMode('slot-editor')
+                    setReviewMode(true)
+                  }}
+                >
+                  ← Back
+                </GhostButton>
+                <PrimaryButton onClick={() => setEditorMode('music')}>Continue →</PrimaryButton>
+              </div>
+            </>
+          ) : null}
+
+          {/* Music selection */}
+          {editorMode === 'music' ? (
+            <>
+              <h2 className="font-display text-2xl font-medium text-text-heading">
+                Pick your music
+              </h2>
+              <MusicSelection manifest={manifest} onRender={() => setEditorMode('render')} />
+              <GhostButton onClick={() => setEditorMode('scene')}>← Back to scene</GhostButton>
+            </>
+          ) : null}
+
+          {/* Render + share */}
+          {editorMode === 'render' || editorMode === 'share' ? (
+            <>
+              <h2 className="font-display text-2xl font-medium text-text-heading">Your video</h2>
+              <RenderScreen manifest={manifest} onBack={() => setEditorMode('music')} />
+            </>
+          ) : null}
+        </section>
+      </div>
     </main>
   )
 }

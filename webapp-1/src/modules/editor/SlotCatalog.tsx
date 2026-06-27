@@ -31,7 +31,7 @@ export function SlotCatalog({ slotType, manifest }: SlotCatalogProps) {
   const assets = getAssetsForSlot(slotType, manifest)
 
   return (
-    <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="flex shrink-0 snap-x snap-mandatory gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <button
         type="button"
         onClick={() => clearSlot(slotType)}
