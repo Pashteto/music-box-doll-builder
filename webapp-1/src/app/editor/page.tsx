@@ -138,7 +138,7 @@ export default function EditorPage() {
             </div>
             <SlotCatalog slotType={currentSlot} manifest={manifest} />
             {currentEntry ? (
-              <TransformControls slotType={currentSlot} entry={currentEntry} mode="slot" />
+              <TransformControls slotType={currentSlot} entry={currentEntry} />
             ) : (
               <p className="text-xs text-text-muted">Pick an item to place it on your doll.</p>
             )}

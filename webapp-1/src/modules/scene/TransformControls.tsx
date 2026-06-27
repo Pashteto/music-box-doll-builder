@@ -1,56 +1,38 @@
 'use client'
 
 import { useAppStore } from '@/store'
-import type { ConstraintMetadata } from '@/lib/constraints'
+import { slotConstraints } from '@/modules/scene/transformBounds'
+import { SLOT_POSITION_BOUNDS } from '@/modules/scene/anchors'
 import type { AssetManifestEntry } from '@/lib/catalog-types'
-import type { SlotType, Transform } from '@/lib/types'
-
-/** Derive the clamp envelope for an asset from its manifest entry. */
-export function entryConstraints(
-  entry: AssetManifestEntry,
-  withPosition = false,
-): ConstraintMetadata {
-  return {
-    minScale: entry.minScale,
-    maxScale: entry.maxScale,
-    minRotation: entry.minRotation,
-    maxRotation: entry.maxRotation,
-    ...(withPosition
-      ? { minPosition: [-0.6, -0.6, -0.6] as const, maxPosition: [0.6, 0.6, 0.6] as const }
-      : {}),
-  }
-}
+import type { SlotType, Transform, Vec3 } from '@/lib/types'
 
 interface TransformControlsProps {
   slotType: SlotType
   entry: AssetManifestEntry
-  /** 'slot' = rotation + scale only; 'global' = also position offset. */
-  mode?: 'slot' | 'global'
 }
 
 function Slider({
   label,
   min,
   max,
-  step,
   value,
   onChange,
 }: {
   label: string
   min: number
   max: number
-  step: number
   value: number
   onChange: (v: number) => void
 }) {
   return (
     <label className="flex items-center gap-3 text-sm">
-      <span className="w-16 shrink-0 text-foreground/70">{label}</span>
+      <span className="w-24 shrink-0 text-text-secondary">{label}</span>
       <input
         type="range"
+        aria-label={label}
         min={min}
         max={max}
-        step={step}
+        step={0.01}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
         className="h-6 flex-1 accent-brand-primary"
@@ -59,75 +41,112 @@ function Slider({
   )
 }
 
+function GroupLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
+      {children}
+    </span>
+  )
+}
+
 /**
- * Constrained rotation/scale (and optional position) sliders for the asset in a
- * slot (E5-T3). All commits route through updateTransform, which clamps to the
- * asset's envelope — UI can never persist out-of-bounds values.
+ * Constrained 6-DOF + scale sliders for the asset in a slot (E-transform). Position
+ * bounds come from the slot's role (SLOT_POSITION_BOUNDS); rotation + scale bounds
+ * from the asset manifest. Every commit routes through updateTransform → applyConstraints,
+ * so the UI can never persist an out-of-bounds value. Reset restores the asset default.
  */
-export function TransformControls({ slotType, entry, mode = 'slot' }: TransformControlsProps) {
+export function TransformControls({ slotType, entry }: TransformControlsProps) {
   const transform = useAppStore(
     (s) => s.slotSelections.find((x) => x.slotType === slotType)?.transform,
   )
   const updateTransform = useAppStore((s) => s.updateTransform)
   if (!transform) return null
 
-  const metadata = entryConstraints(entry, mode === 'global')
-
+  const metadata = slotConstraints(entry, slotType)
+  const box = SLOT_POSITION_BOUNDS[slotType]
   const commit = (next: Transform) => updateTransform(slotType, next, metadata)
 
+  const setPos = (axis: 0 | 1 | 2, v: number) => {
+    const position = [...transform.position] as Vec3
+    position[axis] = v
+    commit({ ...transform, position })
+  }
+  const setRot = (axis: 0 | 1 | 2, v: number) => {
+    const rotation = [...transform.rotation] as Vec3
+    rotation[axis] = v
+    commit({ ...transform, rotation })
+  }
+
   return (
-    <div className="flex flex-col gap-3">
-      <Slider
-        label="Rotate"
-        min={entry.minRotation[1]}
-        max={entry.maxRotation[1]}
-        step={0.01}
-        value={transform.rotation[1]}
-        onChange={(v) =>
-          commit({
-            ...transform,
-            rotation: [transform.rotation[0], v, transform.rotation[2]],
-          })
-        }
-      />
-      <Slider
-        label="Size"
-        min={entry.minScale}
-        max={entry.maxScale}
-        step={0.01}
-        value={transform.scale}
-        onChange={(v) => commit({ ...transform, scale: v })}
-      />
-      {mode === 'global' ? (
-        <>
-          <Slider
-            label="Left/Right"
-            min={-0.6}
-            max={0.6}
-            step={0.01}
-            value={transform.position[0]}
-            onChange={(v) =>
-              commit({
-                ...transform,
-                position: [v, transform.position[1], transform.position[2]],
-              })
-            }
-          />
-          <Slider
-            label="Up/Down"
-            min={-0.6}
-            max={0.6}
-            step={0.01}
-            value={transform.position[1]}
-            onChange={(v) =>
-              commit({
-                ...transform,
-                position: [transform.position[0], v, transform.position[2]],
-              })
-            }
-          />
-        </>
-      ) : null}
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <GroupLabel>Move</GroupLabel>
+        <Slider
+          label="Left / Right"
+          min={box.min[0]}
+          max={box.max[0]}
+          value={transform.position[0]}
+          onChange={(v) => setPos(0, v)}
+        />
+        <Slider
+          label="Up / Down"
+          min={box.min[1]}
+          max={box.max[1]}
+          value={transform.position[1]}
+          onChange={(v) => setPos(1, v)}
+        />
+        <Slider
+          label="Forward / Back"
+          min={box.min[2]}
+          max={box.max[2]}
+          value={transform.position[2]}
+          onChange={(v) => setPos(2, v)}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <GroupLabel>Rotate</GroupLabel>
+        <Slider
+          label="Spin"
+          min={entry.minRotation[1]}
+          max={entry.maxRotation[1]}
+          value={transform.rotation[1]}
+          onChange={(v) => setRot(1, v)}
+        />
+        <Slider
+          label="Tilt forward"
+          min={entry.minRotation[0]}
+          max={entry.maxRotation[0]}
+          value={transform.rotation[0]}
+          onChange={(v) => setRot(0, v)}
+        />
+        <Slider
+          label="Tilt sideways"
+          min={entry.minRotation[2]}
+          max={entry.maxRotation[2]}
+          value={transform.rotation[2]}
+          onChange={(v) => setRot(2, v)}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <GroupLabel>Size</GroupLabel>
+        <Slider
+          label="Size"
+          min={entry.minScale}
+          max={entry.maxScale}
+          value={transform.scale}
+          onChange={(v) => commit({ ...transform, scale: v })}
+        />
+      </div>
+
+      <button
+        type="button"
+        onClick={() => commit(entry.defaultTransform)}
+        className="self-start text-xs font-semibold uppercase tracking-[0.12em] text-link transition-colors hover:text-brand-primary-hover"
+      >
+        ↺ Reset part
+      </button>
     </div>
   )
 }
